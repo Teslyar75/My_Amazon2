@@ -24,6 +24,10 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
 
+        // Нужен ViewedProductsService (и другим сервисам с доступом к HttpContext).
+        // В Api раньше не регистрировали — из‑за этого падал старт.
+        services.AddHttpContextAccessor();
+
         services.AddSingleton<IKdfService, PbKdf1Service>();
         services.AddSingleton<IStorageService, DiskStorageService>();
         services.AddScoped<ICartService, CartService>();
