@@ -14,15 +14,37 @@
 
 ```bash
 cd d:\Amazon2
-dotnet run --project src/DuSoleil.Web
+dotnet run --project src/DuSoleil.Web --launch-profile http
 ```
+
+Открывай именно **http://localhost:5122/** (не `https://`). В Development HTTPS-редирект отключён.
 
 | Что | URL / данные |
 |-----|----------------|
-| Витрина | http://localhost:5122/ (порт смотри в консоли) |
-| Каталог | `/Products` |
-| Админка | `/Admin/Login` — **`Admin` / `Admin`** |
+| Витрина | http://localhost:5122/ |
+| Каталог | http://localhost:5122/Products |
+| Админка | http://localhost:5122/Admin/Login — **`Admin` / `Admin`** |
 | Покупатель | `/Account/Register` → Login |
-| API + Swagger | `dotnet run --project src/DuSoleil.Api` → `/swagger` |
+| API + Swagger | `dotnet run --project src/DuSoleil.Api` → порт из консоли `/swagger` |
 
 БД: `(localdb)\mssqllocaldb` → **`DuSoleil`**.
+
+---
+
+## Скриншоты
+
+Каталог картинок с подписями: **[screenshots/README.md](./screenshots/README.md)**
+
+| # | Экран | Файл |
+|---|--------|------|
+| 1 | Главная | [01-home.png](./screenshots/01-home.png) |
+| 2 | Каталог + фильтры | [02-catalog.png](./screenshots/02-catalog.png) |
+| 3 | Sign in | [03-login.png](./screenshots/03-login.png) |
+| 4 | Admin Dashboard | [04-admin-dashboard.png](./screenshots/04-admin-dashboard.png) |
+| 5 | Admin категории/товары | [05-admin-catalog.png](./screenshots/05-admin-catalog.png) |
+| 6 | Admin Users | [06-admin-users.png](./screenshots/06-admin-users.png) |
+| 7 | Product Page | [07-product-details.png](./screenshots/07-product-details.png) |
+| 8 | Cart (update) | [08-cart-update.png](./screenshots/08-cart-update.png) |
+| 9 | Profile | [09-profile.png](./screenshots/09-profile.png) |
+| 10 | Related products | [10-related-products.png](./screenshots/10-related-products.png) |
+| 11 | Cart (full) | [11-cart-full.png](./screenshots/11-cart-full.png) |
