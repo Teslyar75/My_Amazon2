@@ -1,0 +1,29 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.swp
+
+## IDE
+.idea/
+.vscode/
+
+## Local / secrets
+appsettings.*.local.json
+*.pfx
+
+## Uploads
+**/wwwroot/uploads/*
+
+## Reference clones
+_ref/
+
+
+## OS
+Thumbs.db
+Desktop.ini
+
+## Temp
+.figma-tmp/

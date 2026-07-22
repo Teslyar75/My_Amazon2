@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+@*
+  Общий каркас сайта: шапка (лого, поиск, корзина) + контент + подвал.
+  Соответствует header/footer из макета Figma.
+*@
+@using DuSoleil.Infrastructure.Services
+@using DuSoleil.Web.Extensions
+@inject ICartService CartService
+@{
+    var cartCount = await Context.GetCartBadgeCountAsync(CartService);
+    var isAuth = User.Identity?.IsAuthenticated ?? false;
+    var isAdmin = User.IsInRole("Admin");
+}
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — Du Soleil</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="logo" asp-page="/Index">Du Soleil</a>
+
+            <form class="search-form" method="get" asp-page="/Products/Index">
+                <input type="search" name="search" placeholder="Search products..." value="@Context.Request.Query["search"]" />
+                <button type="submit" aria-label="Search">⌕</button>
+            </form>
+
+            <nav class="header-actions">
+                <a asp-page="/Products/Index" class="header-link">Catalog</a>
+                @if (isAuth)
+                {
+                    <a asp-page="/Account/Profile" class="header-link">@User.Identity!.Name</a>
+                    <a asp-page="/Orders/Index" class="header-link">Orders</a>
+                    <a href="?logout=1" class="header-link">Sign out</a>
+                }
+                else
+                {
+                    <a asp-page="/Account/Login" class="header-link">Sign in</a>
+                    <a asp-page="/Account/Register" class="header-link">Register</a>
+                }
+                @if (isAdmin)
+                {
+                    <a asp-page="/Admin/Index" class="header-link">Admin</a>
+                }
+                <a asp-page="/Cart/Index" class="header-link cart-link">
+                    Cart
+                    @if (cartCount > 0)
+                    {
+                        <span class="cart-badge">@cartCount</span>
+                    }
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-col">
+                <h4>Support</h4>
+                <a href="#">Help Center</a>
+                <a href="#">Shipping</a>
+                <a href="#">Returns</a>
+            </div>
+            <div class="footer-col">
+                <h4>Legal notice</h4>
+                <a href="#">Terms and Conditions</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Cookie Policy</a>
+            </div>
+            <div class="footer-col">
+                <h4>Social media</h4>
+                <div class="social-row">
+                    <span></span><span></span><span></span><span></span>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span class="logo logo-sm">Du Soleil</span>
+            <span>Copyright © @DateTime.UtcNow.Year Du Soleil. All rights reserved.</span>
+        </div>
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

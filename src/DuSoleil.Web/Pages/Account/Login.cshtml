@@ -1,0 +1,20 @@
+@page
+@model DuSoleil.Web.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Sign in";
+}
+
+<div class="page-wrap auth-box">
+    <h1>Sign in</h1>
+    @if (!string.IsNullOrEmpty(Model.Error))
+    {
+        <div class="alert alert-error">@Model.Error</div>
+    }
+    <form method="post" class="admin-form">
+        <input type="hidden" asp-for="ReturnUrl" />
+        <label>Login <input asp-for="Login" required /></label>
+        <label>Password <input asp-for="Password" type="password" required /></label>
+        <button class="btn btn-primary" type="submit">Sign in</button>
+    </form>
+    <p>No account? <a asp-page="/Account/Register">Create one</a></p>
+</div>

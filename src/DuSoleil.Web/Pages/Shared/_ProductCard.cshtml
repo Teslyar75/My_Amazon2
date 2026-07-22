@@ -1,0 +1,48 @@
+@model ProductCardVm
+@*
+  Переиспользуемая карточка товара (фото, бейджи, рейтинг, цена).
+  Используется на главной, в каталоге и в блоках рекомендаций.
+*@
+
+<a class="product-card @(Model.Status == ProductStatus.OutOfStock ? "is-oos" : null)"
+   asp-page="/Products/Details"
+   asp-route-id="@(string.IsNullOrEmpty(Model.Slug) ? Model.Id.ToString() : Model.Slug)">
+    <div class="product-card__media">
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" alt="@Model.Name" loading="lazy" />
+        }
+        else
+        {
+            <div class="img-placeholder"></div>
+        }
+
+        @if (Model.DiscountPercent is > 0)
+        {
+            <span class="badge badge-discount">-@Model.DiscountPercent%</span>
+        }
+        @if (Model.IsBestSeller)
+        {
+            <span class="badge badge-best">Best seller</span>
+        }
+        @if (Model.Status == ProductStatus.OutOfStock)
+        {
+            <span class="badge badge-oos">Out of stock</span>
+        }
+    </div>
+
+    <div class="product-card__body">
+        <h3 class="product-card__title">@Model.Name</h3>
+        <div class="product-card__rating">
+            <span class="stars">★ @Model.AverageRating.ToString("0.0")</span>
+            <span class="reviews">(@Model.ReviewCount.ToString("N0"))</span>
+        </div>
+        <div class="product-card__price">
+            <strong>$@Model.Price.ToString("0.00")</strong>
+            @if (Model.OldPrice is > 0)
+            {
+                <s>$@Model.OldPrice.Value.ToString("0.00")</s>
+            }
+        </div>
+    </div>
+</a>
