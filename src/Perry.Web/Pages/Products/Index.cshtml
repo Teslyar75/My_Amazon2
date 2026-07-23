@@ -1,0 +1,158 @@
+@page
+@model Perry.Web.Pages.Products.IndexModel
+@{
+    // Каталог — Desktop - Product List Page (Figma): фильтры слева + товары
+    ViewData["Title"] = Model.CategoryName ?? (string.IsNullOrWhiteSpace(Model.Search) ? "Catalog" : $"Search: {Model.Search}");
+}
+
+<div class="page-wrap">
+    <nav class="breadcrumbs">
+        <a asp-page="/Index">Home</a>
+        <span>/</span>
+        <span>@(Model.CategoryName ?? "Catalog")</span>
+    </nav>
+
+    <div class="catalog-layout">
+        <aside class="catalog-filters">
+            <h2>Filters</h2>
+            <form method="get" class="filters-form">
+                <input type="hidden" name="sort" value="@Model.Sort" />
+                <input type="hidden" name="search" value="@Model.Search" />
+
+                <fieldset>
+                    <legend>Category</legend>
+                    <label class="filter-radio">
+                        <input type="radio" name="categoryId" value="" checked="@(!Model.CategoryId.HasValue)" onchange="this.form.submit()" />
+                        All
+                    </label>
+                    @foreach (var c in Model.CategoryNav)
+                    {
+                        <label class="filter-radio">
+                            <input type="radio" name="categoryId" value="@c.Id"
+                                   checked="@(Model.CategoryId == c.Id)"
+                                   onchange="this.form.submit()" />
+                            @c.Name
+                        </label>
+                    }
+                </fieldset>
+
+                <fieldset>
+                    <legend>Brand</legend>
+                    <select name="brand" onchange="this.form.submit()">
+                        <option value="">Any brand</option>
+                        @foreach (var b in Model.Brands)
+                        {
+                            if (Model.Brand == b)
+                            {
+                                <option value="@b" selected>@b</option>
+                            }
+                            else
+                            {
+                                <option value="@b">@b</option>
+                            }
+                        }
+                    </select>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Price</legend>
+                    <div class="price-row">
+                        <input type="number" name="minPrice" step="0.01" min="0" placeholder="Min" value="@Model.MinPrice" />
+                        <span>–</span>
+                        <input type="number" name="maxPrice" step="0.01" min="0" placeholder="Max" value="@Model.MaxPrice" />
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Customer reviews</legend>
+                    @for (var r = 4; r >= 1; r--)
+                    {
+                        <label class="filter-radio">
+                            <input type="radio" name="minRating" value="@r"
+                                   checked="@(Model.MinRating == r)"
+                                   onchange="this.form.submit()" />
+                            ★ @r &amp; up
+                        </label>
+                    }
+                    <label class="filter-radio">
+                        <input type="radio" name="minRating" value=""
+                               checked="@(!Model.MinRating.HasValue)"
+                               onchange="this.form.submit()" />
+                        Any rating
+                    </label>
+                </fieldset>
+
+                <button class="btn btn-primary" type="submit" style="width:100%">Apply</button>
+                <a class="btn btn-ghost" asp-page="/Products/Index" style="width:100%;margin-top:8px;text-align:center">Clear</a>
+            </form>
+        </aside>
+
+        <div class="catalog-main">
+            <div class="catalog-head">
+                <h1>@(Model.CategoryName ?? "All products") <span class="muted">(@Model.Total)</span></h1>
+                <form method="get" class="catalog-toolbar">
+                    @if (Model.CategoryId.HasValue)
+                    {
+                        <input type="hidden" name="categoryId" value="@Model.CategoryId" />
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Brand))
+                    {
+                        <input type="hidden" name="brand" value="@Model.Brand" />
+                    }
+                    @if (Model.MinPrice.HasValue)
+                    {
+                        <input type="hidden" name="minPrice" value="@Model.MinPrice" />
+                    }
+                    @if (Model.MaxPrice.HasValue)
+                    {
+                        <input type="hidden" name="maxPrice" value="@Model.MaxPrice" />
+                    }
+                    @if (Model.MinRating.HasValue)
+                    {
+                        <input type="hidden" name="minRating" value="@Model.MinRating" />
+                    }
+                    <input type="search" name="search" value="@Model.Search" placeholder="Search..." />
+                    <select name="sort" onchange="this.form.submit()">
+                        @if (Model.Sort == "price_desc") { <option value="price_desc" selected>From expensive to cheap</option> } else { <option value="price_desc">From expensive to cheap</option> }
+                        @if (Model.Sort == "price_asc") { <option value="price_asc" selected>From cheap to expensive</option> } else { <option value="price_asc">From cheap to expensive</option> }
+                        @if (Model.Sort == "rating_desc") { <option value="rating_desc" selected>Top rated</option> } else { <option value="rating_desc">Top rated</option> }
+                        @if (Model.Sort == "newest") { <option value="newest" selected>Newest</option> } else { <option value="newest">Newest</option> }
+                    </select>
+                    <button class="btn btn-primary" type="submit">Apply</button>
+                </form>
+            </div>
+
+            @if (Model.Products.Count == 0)
+            {
+                <p class="empty-state">No products match these filters.</p>
+            }
+            else
+            {
+                <div class="product-grid">
+                    @foreach (var p in Model.Products)
+                    {
+                        <partial name="_ProductCard" model="p" />
+                    }
+                </div>
+
+                <div class="pagination">
+                    @for (var i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <a class="@(i == Model.PageNumber ? "active" : null)"
+                           asp-page="/Products/Index"
+                           asp-route-pageNumber="@i"
+                           asp-route-categoryId="@Model.CategoryId"
+                           asp-route-search="@Model.Search"
+                           asp-route-brand="@Model.Brand"
+                           asp-route-minPrice="@Model.MinPrice"
+                           asp-route-maxPrice="@Model.MaxPrice"
+                           asp-route-minRating="@Model.MinRating"
+                           asp-route-sort="@Model.Sort">@i</a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <partial name="_ViewedProducts" model="Model.ViewedProducts" />
+</div>

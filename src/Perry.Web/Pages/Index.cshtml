@@ -1,0 +1,76 @@
+﻿@page
+@model IndexModel
+@{
+    // Главная витрина — Desktop - Main (Figma)
+    ViewData["Title"] = "Home";
+}
+
+<section class="hero">
+    <div class="hero__content">
+        <p class="hero__eyebrow">Perry marketplace</p>
+        <h1>Everything you love, delivered</h1>
+        <p class="hero__text">Browse deals, bestsellers and everyday essentials — built for testing the product backend.</p>
+        <a class="btn btn-primary" asp-page="/Products/Index">Shop catalog</a>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-head">
+        <h2>Shop by category</h2>
+        <a asp-page="/Products/Index">See all →</a>
+    </div>
+    <div class="category-grid">
+        @foreach (var cat in Model.CategorySpots)
+        {
+            <a class="category-card" asp-page="/Products/Index" asp-route-categoryId="@cat.Id">
+                <div class="category-card__img">
+                    @if (!string.IsNullOrEmpty(cat.ImageUrl))
+                    {
+                        <img src="@cat.ImageUrl" alt="@cat.Name" />
+                    }
+                </div>
+                <div class="category-card__title">@cat.Name</div>
+                <span class="category-card__link">See all →</span>
+            </a>
+        }
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-head">
+        <h2>Trending deals</h2>
+        <a asp-page="/Products/Index">See all →</a>
+    </div>
+    <div class="product-row">
+        @foreach (var p in Model.TrendingDeals)
+        {
+            <partial name="_ProductCard" model="p" />
+        }
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-head">
+        <h2>Best sellers</h2>
+        <a asp-page="/Products/Index">See all →</a>
+    </div>
+    <div class="product-row">
+        @foreach (var p in Model.BestSellers)
+        {
+            <partial name="_ProductCard" model="p" />
+        }
+    </div>
+</section>
+
+<partial name="_ViewedProducts" model="Model.ViewedProducts" />
+
+<section class="cta-banner">
+    <div>
+        <h2>Be aware of the variety</h2>
+        <p>Join, choose and buy with confidence!</p>
+        <div class="cta-actions">
+            <a class="btn btn-primary" asp-page="/Account/Register">Sign up</a>
+            <a class="btn btn-ghost" asp-page="/Account/Login">Log in</a>
+        </div>
+    </div>
+</section>

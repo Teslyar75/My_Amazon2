@@ -1,0 +1,294 @@
+/* Auth UI — портировано из perry-front (SigninSignup / LoginForm) */
+
+:root {
+  --perry-primary: #B8EA48;
+  --perry-primary-hover: #CDFA6A;
+  --perry-primary-press: #8DD334;
+  --perry-secondary: #4A7BD9;
+  --perry-dark-text: #0E2042;
+  --perry-light-text: #F2F4F8;
+  --perry-objects: #F4FAFF;
+  --perry-input-border: #0E204280;
+  --perry-destructive: #EA4848;
+  --perry-page-bg: #E8EEF6;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body.auth-page {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Mulish, system-ui, sans-serif;
+  color: var(--perry-dark-text);
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 20%, #d4e4ff 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 90% 80%, #e8f7c8 0%, transparent 50%),
+    var(--perry-page-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.auth-modal {
+  width: min(1280px, 100%);
+  padding: 24px;
+  background: var(--perry-objects);
+  border-radius: 8px;
+}
+
+.auth-modal__body {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.auth-modal__form-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.auth-modal__image {
+  flex-shrink: 0;
+}
+
+.auth-modal__image img {
+  display: block;
+  width: 530px;
+  height: auto;
+  max-width: 100%;
+}
+
+.login-form {
+  width: 100%;
+  max-width: 440px;
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.login-form__titles {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.login-form__titles h1 {
+  margin: 0;
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--perry-dark-text);
+}
+
+.login-form__titles h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--perry-dark-text);
+}
+
+.login-form__fields {
+  width: 100%;
+}
+
+.perry-field {
+  position: relative;
+  width: 100%;
+  margin: 20px 0 10px;
+}
+
+.perry-field__label {
+  position: absolute;
+  top: -13px;
+  left: 20px;
+  z-index: 1;
+  padding: 0 4px;
+  background: #fff;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--perry-dark-text);
+  pointer-events: none;
+}
+
+.perry-field__input {
+  width: 100%;
+  padding: 12px 20px;
+  font-family: inherit;
+  font-size: 18px;
+  color: var(--perry-dark-text);
+  background: #fff;
+  border: 1px solid var(--perry-input-border);
+  border-radius: 4px;
+  outline: none;
+}
+
+.perry-field__input:focus {
+  border-color: var(--perry-secondary);
+}
+
+.perry-field--error .perry-field__label {
+  color: var(--perry-destructive);
+}
+
+.perry-field--password .perry-field__input {
+  padding-right: 52px;
+}
+
+.perry-field__toggle {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.perry-field__toggle img {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.login-form__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 0;
+  width: 100%;
+  font-size: 14px;
+}
+
+.login-form__remember {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.login-form__remember input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--perry-dark-text);
+  border-radius: 2px;
+}
+
+.login-form__forgot {
+  color: var(--perry-dark-text);
+  text-decoration: none;
+}
+
+.login-form__forgot:hover {
+  text-decoration: underline;
+}
+
+.perry-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 32px;
+  font-family: inherit;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+  font-weight: 500;
+  color: var(--perry-dark-text);
+  background: var(--perry-primary);
+  border: 2.5px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.perry-btn:hover {
+  background: var(--perry-primary-hover);
+  border-color: var(--perry-primary);
+}
+
+.perry-btn:active {
+  background: var(--perry-primary-press);
+  border-color: transparent;
+}
+
+.auth-modal__signup {
+  margin: 0;
+  font-size: 14px;
+  text-align: center;
+}
+
+.auth-modal__signup a {
+  color: var(--perry-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-modal__signup a:hover {
+  text-decoration: underline;
+}
+
+.auth-alert {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 0 4px;
+  padding: 10px 14px;
+  border-radius: 4px;
+  background: #ffcccc;
+  color: #c22020;
+  font-size: 14px;
+}
+
+.auth-back {
+  position: fixed;
+  top: 20px;
+  left: 24px;
+  color: var(--perry-dark-text);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.auth-back:hover {
+  color: var(--perry-secondary);
+}
+
+@media (max-width: 1100px) {
+  .auth-modal__image {
+    display: none;
+  }
+
+  .login-form {
+    min-height: auto;
+  }
+
+  .login-form__titles h1 {
+    font-size: 32px;
+  }
+
+  .login-form__titles h2 {
+    font-size: 20px;
+  }
+}

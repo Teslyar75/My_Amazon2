@@ -1,6 +1,8 @@
-# DuSoleil
+# Perry
 
-Дипломный маркетплейс (зона товаров) на **ASP.NET Core 8** — витрина + админка + REST API по макету Figma, с паттернами из [HomeWork_25.10.2025](https://github.com/Teslyar75/HomeWork_25.10.2025.git).
+Дипломный маркетплейс **Perry** на **ASP.NET Core 8** — витрина + админка + REST API.
+Рабочее название совпадает с фронтом команды: [perry-front](https://github.com/ITSTEP-PERRY/perry-front.git).
+Проекты решения: `Perry.Domain`, `Perry.Infrastructure`, `Perry.Web`, `Perry.Api`.
 
 ## Документация
 
@@ -16,15 +18,21 @@
 ## Запуск
 
 ```bash
-dotnet run --project src/DuSoleil.Web --launch-profile http
+dotnet run --project src/Perry.Web --launch-profile http
 ```
 
 Открывай **http://localhost:5122/** (не https — иначе браузер может показать «нет доступа»).
 
 - Админ: `/Admin/Login` — `Admin` / `Admin`  
-- API: `dotnet run --project src/DuSoleil.Api` → `/swagger`
+- API: `dotnet run --project src/Perry.Api` → `/swagger`
 
-БД: `(localdb)\mssqllocaldb` → `DuSoleil`.
+БД: `(localdb)\mssqllocaldb` → `Perry`.
+
+## Что сделано недавно
+
+- Ребрендинг **DuSoleil → Perry** (solution, проекты, namespaces, БД, UI).
+- UI входа покупателя и админа по макету команды ([perry-front](https://github.com/ITSTEP-PERRY/perry-front.git)).
+- Подробности: [docs/ПРОДЕЛАННАЯ-РАБОТА.md](./docs/ПРОДЕЛАННАЯ-РАБОТА.md) §11.
 
 ## Скриншоты
 

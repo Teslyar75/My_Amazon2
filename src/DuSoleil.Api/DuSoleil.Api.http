@@ -1,6 +1,0 @@
-@DuSoleil.Api_HostAddress = http://localhost:5272
-
-GET {{DuSoleil.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

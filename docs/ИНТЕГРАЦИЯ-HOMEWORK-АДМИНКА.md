@@ -1,16 +1,16 @@
-# Интеграция homework → диплом DuSoleil (Figma)
+# Интеграция homework → диплом Perry (Figma)
 
 Источник логики: [HomeWork_25.10.2025](https://github.com/Teslyar75/HomeWork_25.10.2025.git)  
-Визуал: макет Figma «Дипломная работа» (бренд Du Soleil / Amazon-like).
+Визуал: макет Figma «Дипломная работа» (бренд Perry / Amazon-like).
 
 Клон для справки лежит в `_ref/HomeWork_25.10.2025` (в `.gitignore`).  
-В DuSoleil перенесено **по паттерну** (Domain / Infrastructure / Web / Api), БД — **SQL Server LocalDB**, не SQLite homework.
+В Perry перенесено **по паттерну** (Domain / Infrastructure / Web / Api), БД — **SQL Server LocalDB**, не SQLite homework.
 
 ---
 
 ## 1. Карта Figma → код
 
-| Экран Figma | В DuSoleil |
+| Экран Figma | В Perry |
 |-------------|------------|
 | Desktop - Main | `/` — hero, категории, deals, best sellers, **Recently viewed** |
 | Product List Page | `/Products` — сайдбар **category / brand / price / rating**, sort, пагинация |
@@ -28,7 +28,7 @@
 
 ## 2. Что взято из homework
 
-| Модуль homework | Файл(ы) в HW (ориентир) | В DuSoleil |
+| Модуль homework | Файл(ы) в HW (ориентир) | В Perry |
 |-----------------|-------------------------|------------|
 | User / UserAccess / UserRole + seed Admin | `Data/Entities/*`, seed | Domain + миграция `AddAdminUsers` |
 | Session-auth | `Middleware/AuthSessionMiddleware.cs` | `Web/Middleware/AuthSessionMiddleware.cs` |
@@ -59,7 +59,7 @@
 
 ## 3. Соответствие soft-delete
 
-| Homework | DuSoleil |
+| Homework | Perry |
 |----------|----------|
 | `Product.DeletedAt` | `Product.Status = Archived` (+ Restore → Active/OutOfStock) |
 | `ProductGroup.DeletedAt` | `Category.IsActive = false` (+ Activate) |
@@ -84,8 +84,8 @@
 ## 5. Как проверить интеграцию
 
 ```bash
-dotnet run --project src/DuSoleil.Web
-dotnet run --project src/DuSoleil.Api
+dotnet run --project src/Perry.Web
+dotnet run --project src/Perry.Api
 ```
 
 | # | Сценарий | Ожидание |
@@ -101,7 +101,7 @@ dotnet run --project src/DuSoleil.Api
 | 9 | Admin Users / Orders | Списки заполнены |
 | 10 | Swagger cart/products | 200 / Created |
 
-БД: `(localdb)\mssqllocaldb` → **`DuSoleil`**.
+БД: `(localdb)\mssqllocaldb` → **`Perry`**.
 
 ---
 
@@ -109,7 +109,7 @@ dotnet run --project src/DuSoleil.Api
 
 | Тема | Путь |
 |------|------|
-| DI сервисов | `src/DuSoleil.Infrastructure/DependencyInjection.cs` |
+| DI сервисов | `src/Perry.Infrastructure/DependencyInjection.cs` |
 | Cart / Order / Viewed / Product / User | `Infrastructure/Services/*.cs` |
 | Session auth | `Web/Middleware/AuthSessionMiddleware.cs` |
 | Витрина | `Web/Pages/Products`, `Cart`, `Account`, `Orders` |

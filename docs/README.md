@@ -1,20 +1,20 @@
-# Документация DuSoleil
+# Документация Perry
 
-Маркетплейс **Du Soleil** (диплом, зона товаров) — ASP.NET Core 8, макет Figma, паттерны из [HomeWork_25.10.2025](https://github.com/Teslyar75/HomeWork_25.10.2025.git).
+Маркетплейс **Perry** (диплом, зона товаров) — ASP.NET Core 8, макет Figma, паттерны из [HomeWork_25.10.2025](https://github.com/Teslyar75/HomeWork_25.10.2025.git).
 
 | Файл | Содержание |
 |------|------------|
 | [ПРОДЕЛАННАЯ-РАБОТА.md](./ПРОДЕЛАННАЯ-РАБОТА.md) | Архитектура, сущности, API, витрина, админка, сервисы, миграции |
 | [КАК-ВЫПОЛНЯТЬ-ЗАДАНИЕ.md](./КАК-ВЫПОЛНЯТЬ-ЗАДАНИЕ.md) | Как запустить, сценарии проверки, что осталось по желанию |
-| [ИНТЕГРАЦИЯ-HOMEWORK-АДМИНКА.md](./ИНТЕГРАЦИЯ-HOMEWORK-АДМИНКА.md) | Что перенесено из homework → DuSoleil |
+| [ИНТЕГРАЦИЯ-HOMEWORK-АДМИНКА.md](./ИНТЕГРАЦИЯ-HOMEWORK-АДМИНКА.md) | Что перенесено из homework → Perry |
 
 ---
 
 ## Быстрый старт
 
 ```bash
-cd d:\Amazon2
-dotnet run --project src/DuSoleil.Web --launch-profile http
+cd D:\Perry\My_Amazon2
+dotnet run --project src/Perry.Web --launch-profile http
 ```
 
 Открывай именно **http://localhost:5122/** (не `https://`). В Development HTTPS-редирект отключён.
@@ -25,9 +25,9 @@ dotnet run --project src/DuSoleil.Web --launch-profile http
 | Каталог | http://localhost:5122/Products |
 | Админка | http://localhost:5122/Admin/Login — **`Admin` / `Admin`** |
 | Покупатель | `/Account/Register` → Login |
-| API + Swagger | `dotnet run --project src/DuSoleil.Api` → порт из консоли `/swagger` |
+| API + Swagger | `dotnet run --project src/Perry.Api` → порт из консоли `/swagger` |
 
-БД: `(localdb)\mssqllocaldb` → **`DuSoleil`**.
+БД: `(localdb)\mssqllocaldb` → **`Perry`**.
 
 ---
 

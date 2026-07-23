@@ -1,4 +1,4 @@
-# Скриншоты Du Soleil (для README)
+# Скриншоты Perry (для README)
 
 Скриншоты рабочей витрины и админки (`http://localhost:5122`).  
 Картинки товаров в seed — placeholder с picsum.photos (для демо бэкенда).

@@ -1,0 +1,212 @@
+@page "{id}"
+@model Perry.Web.Pages.Products.DetailsModel
+@{
+    // Карточка товара — Desktop - Product Page (Figma)
+    // id = Guid или slug (homework Product by slug)
+    ViewData["Title"] = Model.Product!.Name;
+    var p = Model.Product;
+    var mainImage = p.Images.FirstOrDefault(i => i.IsPrimary)?.Url ?? p.Images.FirstOrDefault()?.Url;
+}
+
+<div class="page-wrap">
+    <nav class="breadcrumbs">
+        <a asp-page="/Index">Home</a>
+        @if (!string.IsNullOrEmpty(p.ParentCategoryName))
+        {
+            <span>/</span>
+            <span>@p.ParentCategoryName</span>
+        }
+        <span>/</span>
+        <a asp-page="/Products/Index" asp-route-categoryId="@p.CategoryId">@p.CategoryName</a>
+    </nav>
+
+    <div class="pdp">
+        <div class="pdp-gallery">
+            <div class="pdp-gallery__main">
+                @if (p.DiscountPercent is > 0)
+                {
+                    <span class="badge badge-discount">-@p.DiscountPercent%</span>
+                }
+                @if (!string.IsNullOrEmpty(mainImage))
+                {
+                    <img id="mainImage" src="@mainImage" alt="@p.Name" />
+                }
+                else
+                {
+                    <div class="img-placeholder large"></div>
+                }
+            </div>
+            <div class="pdp-gallery__thumbs">
+                @foreach (var img in p.Images)
+                {
+                    <button type="button" class="thumb @(img.IsPrimary ? "active" : null)" data-url="@img.Url" onclick="document.getElementById('mainImage').src=this.dataset.url">
+                        <img src="@img.Url" alt="" />
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="pdp-info">
+            <h1>@p.Name</h1>
+            <div class="pdp-meta">
+                <span class="stars">★ @p.AverageRating.ToString("0.0")</span>
+                <span>@p.ReviewCount.ToString("N0") reviews</span>
+                <span class="sku">SKU: @p.Sku</span>
+            </div>
+
+            <div class="about-list">
+                <h3>About product</h3>
+                @if (p.AboutItems.Count == 0)
+                {
+                    <p>@p.Description</p>
+                }
+                else
+                {
+                    @foreach (var item in p.AboutItems)
+                    {
+                        <details class="about-item" open>
+                            <summary>@item.Title</summary>
+                            <p>@item.Description</p>
+                        </details>
+                    }
+                }
+            </div>
+        </div>
+
+        <aside class="pdp-buy">
+            @if (TempData["Flash"] is string flash)
+            {
+                <div class="alert alert-ok">@flash</div>
+            }
+            @if (TempData["FlashError"] is string ferr)
+            {
+                <div class="alert alert-error">@ferr</div>
+            }
+            <div class="price-block">
+                <strong>$@p.Price.ToString("0.00")</strong>
+                @if (p.OldPrice is > 0)
+                {
+                    <s>$@p.OldPrice.Value.ToString("0.00")</s>
+                }
+            </div>
+            <div class="buy-row"><span>Status</span><span>@(p.Status == ProductStatus.OutOfStock ? "Out of stock" : "In stock")</span></div>
+            <div class="buy-row"><span>Brand</span><span>@p.Brand</span></div>
+            <div class="buy-row"><span>Qty available</span><span>@p.StockQuantity</span></div>
+
+            @if (p.Status == ProductStatus.OutOfStock)
+            {
+                <button class="btn btn-primary" type="button" disabled>Notify when available</button>
+            }
+            else
+            {
+                <form method="post" asp-page-handler="AddToCart">
+                    <input type="hidden" name="id" value="@p.Id" />
+                    <label class="qty-label">Qty
+                        <input asp-for="AddQuantity" type="number" min="1" max="@p.StockQuantity" value="1" />
+                    </label>
+                    <button class="btn btn-primary" type="submit" style="width:100%;margin-top:8px">Add to cart</button>
+                </form>
+                <a class="btn btn-ghost" asp-page="/Cart/Index" style="width:100%;margin-top:8px;text-align:center">Buy now / Cart</a>
+            }
+        </aside>
+    </div>
+
+    @if (p.Attributes.Count > 0)
+    {
+        <section class="section">
+            <h2>Product details</h2>
+            <table class="specs-table">
+                @foreach (var a in p.Attributes)
+                {
+                    <tr>
+                        <th>@a.Name</th>
+                        <td>@a.Value</td>
+                    </tr>
+                }
+            </table>
+        </section>
+    }
+
+    <section class="section reviews">
+        <h2>Customer reviews</h2>
+        <div class="reviews-summary">
+            <div class="reviews-score">
+                <strong>@p.AverageRating.ToString("0.0")</strong>
+                <span>out of 5 · @p.ReviewCount.ToString("N0") reviews</span>
+            </div>
+            <div class="review-tags">
+                @foreach (var tag in p.Reviews.SelectMany(r => r.Tags).Distinct())
+                {
+                    <span class="tag">@tag</span>
+                }
+            </div>
+        </div>
+
+        <form method="post" asp-page-handler="CreateReview" class="admin-form review-form">
+            <h3>Create review</h3>
+            <input type="hidden" name="id" value="@p.Id" />
+            <div class="form-row">
+                <label>Your name <input asp-for="ReviewAuthor" /></label>
+                <label>Rating
+                    <select asp-for="ReviewRating">
+                        @for (var s = 5; s >= 1; s--)
+                        {
+                            <option value="@s">@s stars</option>
+                        }
+                    </select>
+                </label>
+            </div>
+            <label>Title <input asp-for="ReviewTitle" /></label>
+            <label>Review <textarea asp-for="ReviewBody" rows="3" required></textarea></label>
+            <button class="btn btn-primary" type="submit">Submit review</button>
+        </form>
+
+        @if (p.Reviews.Count == 0)
+        {
+            <p class="empty-state">No reviews yet.</p>
+        }
+        else
+        {
+            <div class="review-list">
+                @foreach (var r in p.Reviews)
+                {
+                    <article class="review-card">
+                        <div class="review-card__head">
+                            <strong>@r.AuthorName</strong>
+                            <span>★ @r.Rating</span>
+                            <time>@r.CreatedAtUtc.ToString("yyyy-MM-dd")</time>
+                        </div>
+                        <h3>@r.Title</h3>
+                        <p>@r.Body</p>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+
+    <section class="section">
+        <div class="section-head">
+            <h2>You may also like</h2>
+        </div>
+        <div class="product-row">
+            @foreach (var item in Model.Related)
+            {
+                <partial name="_ProductCard" model="item" />
+            }
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-head">
+            <h2>Best sellers in @p.CategoryName</h2>
+        </div>
+        <div class="product-row">
+            @foreach (var item in Model.BestInCategory)
+            {
+                <partial name="_ProductCard" model="item" />
+            }
+        </div>
+    </section>
+
+    <partial name="_ViewedProducts" model="Model.ViewedProducts" />
+</div>
