@@ -34,7 +34,7 @@ Hero «Everything you love, delivered», блок Shop by category, Trending dea
 
 ![Sign in](./03-login.png)
 
-Форма Login / Password, ссылка на регистрацию. Общий layout с поиском и футером.
+UI из perry-front: «Welcome back», Email / Password, Stay signed in, кнопка Log in, иллюстрация справа. Layout `_AuthLayout` (без старой Amazon-шапки).
 
 ---
 
