@@ -1,19 +1,32 @@
 ﻿# Perry React storefront (`perry-front`)
 
+## Состояние на 07.10.2026
+
+Учебный маркетплейс **Perry**: desktop-витрина (Vite + React 19), **Expo mobile** (`mobile/`), Product API `Perry.Api`, Auth через Azure / Internal API. Готовность проекта **~96%** — [срез](./docs/продукт/ГОТОВНОСТЬ-ПРОЕКТА-2026-10-07.md), [отчёт дня](./docs/журнал/2026-10-07.md).
+
+| Контур | Статус сегодня |
+|--------|----------------|
+| Desktop `:3000` | Витрина + админка; proxy `/api` → `:5272` |
+| Expo Mobile `:8081` | Expo Web / Expo Go; LAN origin, wishlist на телефоне; EAS `#M09` in progress |
+| Auth / DevAdminAuth | Пакет `#105` Done; `DevAdminAuthController` — `usersLookupOk` / диагностика Internal |
+| Документы | Журнал и готовность за **07.10.2026** в `docs/` |
+
+**Что изменилось в последних обновлениях (07.10):** закрыт Auth-стык (`tokenOk` / `usersLookupOk`), smoke `#108`, правки Expo Go (LAN IP вместо `localhost`, `productOrigin.ts`, `eas.json`), обновлены журналы и readiness ~96%.
+
 ## Быстрый запуск — две иконки
 
 | Ярлык | Что запускает | URL |
 |-------|----------------|-----|
 | **Perry Desktop** | Desktop-витрина (Vite) | http://localhost:3000 |
-| **Perry Mobile** | Mobile (Expo Web) | http://localhost:8081 |
+| **Perry Mobile** | Mobile (Expo Metro / Web) | http://localhost:8081 |
 
 После clone один раз:  
 `powershell -ExecutionPolicy Bypass -File .\Install-Perry-Shortcuts.ps1`  
 (иконки появятся в корне репо и на рабочем столе).
 
 Либо двойной клик по `start-desktop.cmd` / `start-mobile.cmd` (алиасы: `Запуск-Desktop.cmd` / `Запуск-Mobile.cmd`).  
-Нужен **Perry.Api** на `:5272`. Подробнее: [docs/инструкции/КАК-ЗАПУСКАТЬ.md](./docs/инструкции/КАК-ЗАПУСКАТЬ.md).  
-Локальный admin: `Admin`/`Admin` через `/api/dev/admin-login` **только в Development**; в Production эндпоинта нет (#109).  
+Нужен **Perry.Api** на `:5272` (для телефона — слушать `0.0.0.0:5272`, не только localhost). Подробнее: [docs/инструкции/КАК-ЗАПУСКАТЬ.md](./docs/инструкции/КАК-ЗАПУСКАТЬ.md) · mobile: [mobile/README.md](./mobile/README.md).  
+Локальный admin: `Admin`/`Admin` через `/api/dev/admin-login` (**DevAdminAuth**, только Development); в Production эндпоинта нет (#109).  
 Тесты: `dotnet test Perry.sln` (#85, xUnit + SQLite in-memory).
 
 **Отчёт 01.10.2026 (mobile Figma 1:1 + backend):** [docs/журнал/2026-10-01.md](./docs/журнал/2026-10-01.md)  
@@ -414,15 +427,23 @@ Ukraine, Card, Place order.
 ## Запуск
 
 ```bash
-# Terminal 1 — API (из backend-репо)
-cd My_Amazon2/src/Perry.Api   # или клон Back_end_for_our_poroject
+# Terminal 1 — Product API
+cd src/Perry.Api
+# для Expo Go с телефона:
+#   set ASPNETCORE_URLS=http://0.0.0.0:5272
 dotnet run --launch-profile http
 # Swagger: http://localhost:5272/swagger
 
-# Terminal 2 — React
+# Terminal 2 — Desktop (Vite)
 npm install
 npm run dev
 # App: http://localhost:3000
+
+# Terminal 3 — Mobile (Expo Metro)
+cd mobile
+cp .env.example .env   # один раз; для телефона — LAN IP в EXPO_PUBLIC_PRODUCT_URL
+npm start
+# Web: http://localhost:8081  ·  Expo Go: QR / tunnel
 ```
 
 ### Демо
