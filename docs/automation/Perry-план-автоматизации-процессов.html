@@ -1,0 +1,2573 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Perry — план автоматизации процессов (AI, n8n/Make, API)</title>
+<style>
+:root{--bg:#eef2fa;--paper:#ffffff;--ink:#16213a;--muted:#5d6a85;--brand:#4a7bdc;--brand-d:#2f5fd0;--lime:#b8e64a;--line:#dde4f2;--code:#f1f4fb}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.layout{display:grid;grid-template-columns:300px 1fr;min-height:100vh}
+aside{position:sticky;top:0;height:100vh;overflow:auto;padding:22px 16px;background:linear-gradient(180deg,#2f5fd0,#4a7bdc 60%,#5b8ae6);color:#fff}
+aside .brand{font-weight:800;font-size:22px;letter-spacing:.06em}
+aside .brand span{background:var(--lime);color:#16213a;border-radius:6px;padding:0 6px;margin-left:6px;font-size:13px;letter-spacing:0;vertical-align:middle}
+aside .sub{color:#dbe6ff;font-size:13px;margin:4px 0 16px}
+aside ul{list-style:none;margin:0;padding:0}
+aside li a{display:block;padding:5px 10px;border-radius:8px;color:#f3f7ff;text-decoration:none;font-size:14px}
+aside li.l3 a{padding-left:24px;font-size:13px;color:#cfdcff}
+aside li a:hover{background:rgba(255,255,255,.14)}
+aside li a.active{background:var(--lime);color:#16213a;font-weight:600}
+main{max-width:1120px;width:100%;justify-self:center;padding:36px 52px 90px;background:var(--paper);box-shadow:0 0 40px rgba(30,60,140,.08)}
+h1{font-size:34px;line-height:1.2;color:var(--brand-d);margin:.2em 0 .4em}
+h2{font-size:26px;margin-top:2.2em;padding-bottom:.3em;border-bottom:3px solid var(--lime);color:#16213a}
+h3{font-size:19px;margin-top:1.6em;color:var(--brand-d)}
+h4{font-size:16.5px;margin-top:1.6em;color:#24365e}
+a{color:var(--brand-d)} a:hover{text-decoration:none} a.gh{text-decoration:none;border-bottom:1px dashed #9cb6ea}
+blockquote{margin:1em 0;padding:12px 18px;background:#f2f6ff;border-left:4px solid var(--brand);border-radius:0 10px 10px 0;color:#2a3a5c}
+blockquote p{margin:.4em 0}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:14px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:8px 10px;vertical-align:top;text-align:left}
+th{background:#e7eefc} tr:nth-child(even) td{background:#fafbfe}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre.code{position:relative;background:#16213a;color:#eef3ff;padding:16px;border-radius:10px;overflow:auto;font-size:13px}
+pre.code code{background:none;padding:0;color:inherit}
+pre.code .lang{position:absolute;top:6px;right:10px;font-size:11px;color:#9fb2d9;text-transform:uppercase}
+.mermaid-wrap{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin:1em 0;overflow:auto}
+pre.mermaid{margin:0;text-align:center;background:none}
+figure{margin:.8em 0 .2em}
+main img{max-width:100%;border-radius:12px;box-shadow:0 6px 24px rgba(30,60,140,.16);border:1px solid var(--line)}
+main img[src*="mobile"]{max-height:620px;width:auto}
+figure + p em{color:var(--muted);font-size:13.5px}
+hr{border:none;border-top:1px dashed var(--line);margin:2em 0}
+p.navlinks{margin-top:1.6em;padding:10px 14px;background:#f2f6ff;border-radius:10px;font-size:14px}
+p.navlinks a{font-weight:600}
+:target{animation:hl 1.6s ease} tr:has(a:target) td{animation:hl 2.4s ease}
+@keyframes hl{from{background:#efffc8}to{background:transparent}}
+@media(max-width:900px){.layout{grid-template-columns:1fr}aside{position:relative;height:auto}main{padding:20px}}
+@media print{aside{display:none}.layout{display:block}}
+</style></head><body><div class="layout">
+<aside><div class="brand">PERRY<span>automation</span></div><div class="sub">План автоматизации · AI, n8n/Make, API · v1.0 · 06.10.2026</div><nav><ul><li class="l2"><a href="#short">1. Коротко</a></li><li class="l2"><a href="#project">2. Что за проект</a></li><li class="l2"><a href="#screens">3. Как выглядит Perry сейчас</a></li><li class="l3"><a href="#scr-g-front">3.1. Витрина: путь покупателя</a></li><li class="l3"><a href="#scr-g-auth">3.2. Вход и регистрация (Auth)</a></li><li class="l3"><a href="#scr-g-admin">3.3. Админка</a></li><li class="l3"><a href="#scr-g-mobile">3.4. Мобильное приложение</a></li><li class="l2"><a href="#modules">4. Части проекта подробно</a></li><li class="l2"><a href="#admin-ux">5. Админка: что неудобно и что автоматизировать</a></li><li class="l2"><a href="#growth">6. Развитие сервиса: чего не хватает магазину</a></li><li class="l2"><a href="#goals">7. Цель и метрики</a></li><li class="l2"><a href="#map">8. Карта ручных процессов</a></li><li class="l2"><a href="#stream-a">9А. Поток А. Склад и логистика</a></li><li class="l2"><a href="#stream-b">9Б. Поток Б. Каталог и контент</a></li><li class="l2"><a href="#stream-v">9В. Поток В. Маркетинг</a></li><li class="l2"><a href="#stream-g">9Г. Поток Г. Продажи и поддержка</a></li><li class="l2"><a href="#stream-d">9Д. Поток Д. Отчётность и контроль</a></li><li class="l2"><a href="#system">10. Система автоматизации целиком</a></li><li class="l3"><a href="#system-scheme">10.2. Схема системы</a></li><li class="l2"><a href="#agents">11. AI-агенты и оркестрация</a></li><li class="l3"><a href="#agents-hitl">11.2. Человек в контуре (human-in-the-loop)</a></li><li class="l2"><a href="#tools">12. n8n или Make</a></li><li class="l2"><a href="#api-gaps">13. Каких API не хватает в Perry</a></li><li class="l2"><a href="#effect">14. Итоговая оценка эффекта</a></li><li class="l3"><a href="#effect-500">14.2. Честно про 500 часов</a></li><li class="l2"><a href="#plan">15. План внедрения и портфолио</a></li><li class="l3"><a href="#portfolio">15.2. Что сделать первым для портфолио</a></li><li class="l2"><a href="#tech">16. Технические требования</a></li><li class="l2"><a href="#risks">17. Риски</a></li><li class="l2"><a href="#questions">18. Открытые вопросы (❓ требует уточнения)</a></li><li class="l2"><a href="#final">19. Итоговая схема: как всё работает от заказа до доставки</a></li><li class="l3"><a href="#final-steps">19.1. По шагам</a></li><li class="l2"><a href="#sources">20. Источники</a></li><li class="l2"><a href="#glossary">21. Глоссарий</a></li></ul></nav></aside>
+<main><h1>Perry — план автоматизации процессов (AI, n8n/Make, API)</h1>
+<blockquote>
+<p><strong>Для кого:</strong> Сергей Черныш (<a href="https://github.com/Teslyar75" target="_blank" rel="noopener" class="gh">GitHub Teslyar75</a>), организатор команды и автор Product API дипломного проекта Perry (IT STEP).
+<strong>Что это:</strong> план, как превратить Perry из «дипломного магазина» в <strong>магазин, где рутину делают роботы</strong>: <a href="#g-ai">AI</a> (искусственный интеллект), <a href="#g-n8n">n8n</a> / <a href="#g-make">Make</a> (конструкторы автоматизаций) и <a href="#g-api">API</a> (программные «входы» в системы). Документ одновременно служит <strong>кейсом для портфолио</strong> под вакансию <a href="#vacancy">AI Automation / Process Optimization Specialist в Race Expert</a>.
+<strong>Версия:</strong> 1.0, 6 октября 2026. Код смотрим на коммите <a href="https://github.com/Teslyar75/My_Amazon2/commit/bcaec5fc8ab617830197b5fe69a976c6f214cb3e" target="_blank" rel="noopener" class="gh"><code>bcaec5f</code></a>: все ссылки на код ведут на конкретные строки и не «уедут».
+<strong>Условные знаки:</strong> ✅ проверено по коду, скриншоту или источнику · ⚠️ <strong>примерная оценка</strong> или <strong>допущение</strong> · ❓ <strong>требует уточнения</strong>.</p>
+</blockquote>
+<h2><a id="toc"></a>Оглавление</h2>
+<ol>
+<li><a href="#short">Коротко</a>: что делаем и сколько это даёт</li>
+<li><a href="#project">Что за проект</a>: Perry, команда, модули, архитектура</li>
+<li><a href="#screens">Как выглядит Perry сейчас</a>: 19 скриншотов с описанием и привязкой к автоматизациям</li>
+<li><a href="#modules">Части проекта подробно</a>: витрина, Product API, Auth, админка, мобильное приложение</li>
+<li><a href="#admin-ux">Админка: что неудобно и что автоматизировать</a>: по каждому экрану</li>
+<li><a href="#growth">Развитие сервиса: чего не хватает магазину</a></li>
+<li><a href="#goals">Цель и метрики</a>: часы, деньги, ошибки, скорость ответа</li>
+<li><a href="#map">Карта ручных процессов</a>: кто, как часто, сколько минут</li>
+<li>Потоки автоматизации:
+<a href="#stream-a">А. Склад и логистика</a> · <a href="#stream-b">Б. Каталог и контент</a> · <a href="#stream-v">В. Маркетинг</a> · <a href="#stream-g">Г. Продажи и поддержка</a> · <a href="#stream-d">Д. Отчётность и контроль</a></li>
+<li><a href="#system">Система автоматизации целиком</a>: слои, события, данные</li>
+<li><a href="#agents">AI-агенты и оркестрация</a>: агент-диспетчер, одобрение человеком, журнал действий</li>
+<li><a href="#tools">n8n или Make</a>: сравнение и выбор</li>
+<li><a href="#api-gaps">Каких API не хватает в Perry</a></li>
+<li><a href="#effect">Итоговая оценка эффекта</a>: дотягиваем ли до 250 и 500 часов</li>
+<li><a href="#plan">План внедрения и портфолио</a>: график и 3 воркфлоу для собеседования</li>
+<li><a href="#tech">Технические требования</a></li>
+<li><a href="#risks">Риски</a></li>
+<li><a href="#questions">Открытые вопросы</a></li>
+<li><a href="#final">Итоговая схема: от заказа до доставки</a></li>
+<li><a href="#sources">Источники</a> · <a href="#glossary">Глоссарий</a></li>
+</ol>
+<p>У каждого потока одинаковые подразделы: <strong>Цель → Как сейчас и как будет → Схема → Шаги → Связь с API Perry → Эффект → Технические требования → Сложность → Риски.</strong> Процессы пронумерованы (А1…А6, Б1…Б4, В1…В7, Г1…Г3, Д1…Д2), на каждый можно сослаться: например, <a href="#a4">А4</a> — накладные «Новой почты».</p>
+<hr />
+<h2><a id="short"></a>1. Коротко</h2>
+<p><strong>Идея в одной фразе.</strong> Берём Perry так, как будто это работающий интернет-магазин, находим, где люди делают руками одно и то же, и отдаём это <a href="#g-workflow">воркфлоу</a> в n8n, которые ходят в <a href="#mod-api">API Perry</a>, «Новую почту», Telegram и Google Sheets. Над ними стоит <a href="#agents">AI-агент-оркестратор</a>: он решает, какой воркфлоу запустить, а важные действия (деньги, публикации, письма клиентам) <strong>отдаёт человеку на одобрение</strong>.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Что уже есть</strong> ✅</td>
+<td>Работающий магазин: витрина React, Product API на .NET 8 + PostgreSQL, вход через отдельный Auth-сервис, админка, мобильное приложение Expo. 15 автотестов, ~194 демо-товара. См. <a href="#project">Что за проект</a></td>
+</tr>
+<tr>
+<td><strong>Сколько ручной работы</strong> ⚠️</td>
+<td>≈ 473 ч/мес при допущении «50 заказов в день» (<a href="#map">карта процессов</a>)</td>
+</tr>
+<tr>
+<td><strong>Сколько уберём</strong> ⚠️</td>
+<td>≈ 362 ч/мес после 12 недель внедрения ≈ <strong>72 500 грн/мес</strong> при примерной ставке 200 грн/ч (<a href="#effect">эффект</a>)</td>
+</tr>
+<tr>
+<td><strong>Цель вакансии</strong> ✅</td>
+<td>250 сэкономленных часов в месяц минимум, около 500 ч/мес к концу первых 3 месяцев (<a href="#vacancy">вакансия</a>)</td>
+</tr>
+<tr>
+<td><strong>Честный вывод</strong></td>
+<td>250 ч/мес достигаем на 2-м месяце. 500 ч/мес при 50 заказах в день <strong>не достигаем</strong>: нужно ≈ 90 заказов в день или ещё один поток (например, финансы). Расчёт в <a href="#effect-500">разделе 14</a></td>
+</tr>
+<tr>
+<td><strong>Первые шаги для портфолио</strong></td>
+<td>3 воркфлоу, которые можно собрать в локальном n8n против локального Perry API за выходные: <a href="#pf-1">KPI-дайджест</a>, <a href="#pf-2">бот «где мой заказ»</a>, <a href="#pf-3">AI-описание товара с одобрением</a></td>
+</tr>
+<tr>
+<td><strong>Чего не хватает в коде</strong></td>
+<td>исходящих <a href="#g-webhook">вебхуков</a>, сервисного токена для n8n, точечного обновления остатков, полей доставки в заказе. Список в <a href="#api-gaps">разделе 13</a></td>
+</tr>
+</tbody>
+</table>
+<p><a id="vacancy"></a><strong>Вакансия (проверено 06.10.2026 на <a href="https://www.work.ua/jobs/8532037/" target="_blank" rel="noopener">work.ua/jobs/8532037</a>)</strong> ✅:</p>
+<ul>
+<li><strong>Должность:</strong> AI Automation, Process Optimization Specialist, компания Race Expert (<a href="https://raceexpert.com.ua/" target="_blank" rel="noopener">raceexpert.com.ua</a>), розничная торговля, 10–50 сотрудников, удалённо, полная занятость, 5/2, уровень Middle.</li>
+<li><strong>Зарплата:</strong> 28 000 – 65 000 грн «после всех вычетов», ставка + бонус. Рассматривают бонусы, привязанные к реальному экономическому эффекту.</li>
+<li><strong>Задачи (дословно по смыслу):</strong> самому находить процессы для автоматизации, раскладывать работу команд на операции, описывать будущую логику, собирать и запускать автоматизации (AI, API, Make, n8n), следить, чтобы ими реально пользовались, и <strong>считать экономию времени и денег</strong> каждого решения.</li>
+<li><strong>С чего начнут:</strong> первым большим направлением названы <strong>бухгалтерия и финансовые процессы</strong>. Дальше: контент-маркетинг, продажи, операционные процессы, закупки, <strong>склад</strong>, аналитика. ⚠️ Уточнение: пользователь говорил про «складскую логистику и маркетинг», а в тексте вакансии первыми стоят финансы, склад и маркетинг идут следом.</li>
+<li><strong>Ориентир:</strong> минимум <strong>250</strong> сэкономленных рабочих часов в месяц; за первые 3 месяца выйти примерно на <strong>500</strong> сэкономленных часов в месяц.</li>
+<li><strong>Плюсом будет:</strong> n8n, Make, AI-модели и AI-агенты, API и webhooks, CRM, ClickUp, 1С или другие учётные системы, e-commerce. Глубокая разработка не обязательна.</li>
+<li><strong>Формат:</strong> украинский язык обязателен, подчинение Project Manager, своей команды нет.</li>
+<li><strong>Главная фраза для портфолио:</strong> «Нам не подойдёт человек, который говорит: &quot;Я сделал классного AI-бота&quot;, но не может ответить, что этот бот дал бизнесу в часах или деньгах». Поэтому в этом документе <strong>у каждого шага есть часы и гривны</strong>.</li>
+</ul>
+<blockquote>
+<p>❓ Внутренние процессы Race Expert нам неизвестны, мы их <strong>не описываем</strong>. Все процессы ниже относятся к Perry как к условному работающему магазину. Где в коде Perry чего-то нет, стоит пометка <strong>допущение</strong>.</p>
+</blockquote>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#project">→ далее: Что за проект</a></p>
+<hr />
+<h2><a id="project"></a>2. Что за проект</h2>
+<h3><a id="project-what"></a>2.1. Perry одной картинкой</h3>
+<p><strong>Perry (PERRY)</strong> — дипломный командный проект IT STEP: интернет-магазин-маркетплейс, «наша версия Амазона». Покупатель листает каталог с фильтрами, кладёт товары в корзину (даже без входа), оформляет заказ, следит за статусом, пишет отзывы и ведёт список избранного (wishlist). Администратор управляет товарами, категориями, отзывами, заказами и пользователями.</p>
+<p>Репозитории: <a href="https://github.com/Teslyar75/My_Amazon2" target="_blank" rel="noopener" class="gh">Teslyar75/My_Amazon2</a> (основной, его Сергей называет «Tesla 75 / Amazon 2») и командное зеркало <a href="https://github.com/ITSTEP-PERRY/Back_end_for_our_poroject" target="_blank" rel="noopener">ITSTEP-PERRY/Back_end_for_our_poroject</a>. На ноутбуке Сергея проект лежит в <code>D:\Perry</code> (в этом плане его не трогаем). Клон на коммите <code>bcaec5f</code> лежит в <code>/workspace/perry</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Факт</th>
+<th>Значение</th>
+<th>Откуда</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Роль Сергея</td>
+<td>организатор команды (доска <a href="https://trello.com/b/bwEYs3Kq/itstep-perry" target="_blank" rel="noopener">Trello ITSTEP-PERRY</a>, задачи, ежедневные отчёты) и автор <strong>Product API</strong></td>
+<td><a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/README.md" target="_blank" rel="noopener" class="gh">README</a></td>
+</tr>
+<tr>
+<td>Чужие зоны</td>
+<td><strong>Auth-сервис</strong> (вход, JWT) — Влад; <strong>бэкенд админки</strong> — другой участник</td>
+<td><a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/%D1%81%D1%82%D1%8B%D0%BA%D0%B8/AUTH-INTEGRATION.md" target="_blank" rel="noopener" class="gh">AUTH-INTEGRATION.md</a>, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/project_defense/DEFENSE_BACKEND.md" target="_blank" rel="noopener" class="gh">DEFENSE_BACKEND.md</a></td>
+</tr>
+<tr>
+<td>Стек</td>
+<td>React 19 + Vite (витрина, <code>localhost:3000</code>), ASP.NET Core 8 Product API со <a href="#g-swagger">Swagger</a> (<code>:5272</code>), PostgreSQL 16, Expo (мобильное)</td>
+<td><a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Program.cs#L41-L80" target="_blank" rel="noopener" class="gh">Program.cs</a>, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docker-compose.yml#L11-L59" target="_blank" rel="noopener" class="gh">docker-compose.yml</a>, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/mobile/package.json" target="_blank" rel="noopener" class="gh">mobile/package.json</a></td>
+</tr>
+<tr>
+<td>Цифры с защиты</td>
+<td>22 экрана Figma, 29 страниц, 10 разделов API, 15 тестов, 14 диаграмм, 25 ежедневных отчётов, готовность ~94–96 %</td>
+<td>защита; 15 тестов ✅ по <a href="https://github.com/Teslyar75/My_Amazon2/tree/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/tests/Perry.Tests" target="_blank" rel="noopener" class="gh">tests/Perry.Tests</a>, 25 файлов в <a href="https://github.com/Teslyar75/My_Amazon2/tree/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/%D0%B6%D1%83%D1%80%D0%BD%D0%B0%D0%BB" target="_blank" rel="noopener" class="gh">docs/журнал</a> ✅</td>
+</tr>
+<tr>
+<td>Демо-данные</td>
+<td>~194 товара с фото из DummyJSON</td>
+<td><a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Persistence/DbSeeder.cs#L67-L77" target="_blank" rel="noopener" class="gh">DbSeeder.cs</a></td>
+</tr>
+</tbody>
+</table>
+<h3><a id="project-modules"></a>2.2. Из каких частей состоит</h3>
+<table>
+<thead>
+<tr>
+<th>Часть</th>
+<th>Что это простыми словами</th>
+<th>Где в коде</th>
+<th>Подробно</th>
+<th>Экраны</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Витрина</strong> (frontend)</td>
+<td>сайт для покупателя: главная, каталог, карточка товара, корзина, оформление, кабинет</td>
+<td><a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/frontend/src/app/router.tsx#L37-L74" target="_blank" rel="noopener" class="gh">frontend/src/app/router.tsx</a></td>
+<td><a href="#mod-front">4.1</a></td>
+<td><a href="#scr-home">рис. 1–10</a></td>
+</tr>
+<tr>
+<td><strong>Product API</strong> (зона Сергея)</td>
+<td>«мозг» магазина: товары, категории, корзина, заказы, отзывы, wishlist, остатки</td>
+<td><a href="https://github.com/Teslyar75/My_Amazon2/tree/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers" target="_blank" rel="noopener" class="gh">src/Perry.Api/Controllers</a></td>
+<td><a href="#mod-api">4.2</a></td>
+<td>все экраны витрины</td>
+</tr>
+<tr>
+<td><strong>Auth-сервис</strong> (зона Влада)</td>
+<td>отдельный сервис в Azure: регистрация, вход, коды на email, выдача <a href="#g-jwt">JWT</a></td>
+<td><a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/AuthInternalClient.cs#L21-L25" target="_blank" rel="noopener" class="gh">AuthInternalClient.cs</a></td>
+<td><a href="#mod-auth">4.3</a></td>
+<td><a href="#scr-login">рис. 11</a></td>
+</tr>
+<tr>
+<td><strong>Админка</strong> (UI + Admin Service)</td>
+<td>панель управления: товары, категории, отзывы, заказы, пользователи</td>
+<td><a href="https://github.com/Teslyar75/My_Amazon2/tree/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/frontend/src/pages/admin" target="_blank" rel="noopener" class="gh">frontend/src/pages/admin</a></td>
+<td><a href="#mod-admin">4.4</a></td>
+<td><a href="#scr-admin-dashboard">рис. 12–18</a></td>
+</tr>
+<tr>
+<td><strong>Мобильное приложение</strong></td>
+<td>то же, что витрина, на телефоне (Expo, React Native)</td>
+<td><a href="https://github.com/Teslyar75/My_Amazon2/tree/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/mobile/src/screens" target="_blank" rel="noopener" class="gh">mobile/src/screens</a></td>
+<td><a href="#mod-mobile">4.5</a></td>
+<td><a href="#scr-mobile">рис. 19</a></td>
+</tr>
+</tbody>
+</table>
+<h3><a id="project-arch"></a>2.3. Как всё устроено (по диаграммам защиты)</h3>
+<p>На защите команда показала 18 диаграмм. Две главные, без пересказа:</p>
+<figure><img src="img/d01-architecture.jpg" alt="Общая архитектура Perry: браузер, React SPA, Admin Service, Perry.Api, Auth Service, PostgreSQL" / loading="lazy"></figure>
+<p><em>Рис. A. Общая архитектура. Источник: диаграмма защиты <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/project_defense/views_project/01-diagram.png" target="_blank" rel="noopener" class="gh">project_defense/views_project/01-diagram.png</a>.</em></p>
+<figure><img src="img/d13-microservices.jpg" alt="Микросервисы: фронт, Admin Service, Product API, Auth Service, внутренний вызов #97" / loading="lazy"></figure>
+<p><em>Рис. B. Три сервиса и порядок вызовов: 1) вход в Auth, 2) каталог и заказы в Product API с JWT, 3) пользователи через Admin Service, 4) внутренний запрос Product API → Auth за именами пользователей (#97). Источник: <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/project_defense/views_project/13-diagram.png" target="_blank" rel="noopener" class="gh">project_defense/views_project/13-diagram.png</a>.</em></p>
+<p>Та же схема в Mermaid, с местом, куда встанет автоматизация (пунктир — то, чего ещё нет):</p>
+<div class="mermaid-wrap"><pre class="mermaid">flowchart LR
+  B[&quot;Браузер&lt;br/&gt;витрина :3000&quot;] --&gt; SPA[&quot;React + Vite SPA&quot;]
+  M[&quot;Мобильное Expo&lt;br/&gt;:8081&quot;] --&gt; API
+  SPA --&gt;|&quot;вход, JWT&quot;| AUTH[&quot;Auth Service&lt;br/&gt;Azure, Влад&quot;]
+  SPA --&gt;|&quot;Bearer JWT&lt;br/&gt;/api/*&quot;| API[&quot;Product API :5272&lt;br/&gt;зона Сергея&quot;]
+  SPA --&gt;|&quot;Admin JWT&quot;| ADM[&quot;Admin Service&lt;br/&gt;пользователи&quot;]
+  API --&gt;|&quot;internal/auth/token&lt;br/&gt;internal/users/id&quot;| AUTH
+  API --&gt; DB[(&quot;PostgreSQL&lt;br/&gt;Product DB&quot;)]
+  API --&gt;|&quot;SMTP письма&quot;| MAIL[&quot;Email покупателю&quot;]
+  N8N[&quot;n8n + AI-агент&lt;br/&gt;будущее&quot;] -.-&gt;|&quot;HTTP Request&lt;br/&gt;сервисный токен&quot;| API
+  API -.-&gt;|&quot;вебхуки событий&lt;br/&gt;нужно добавить&quot;| N8N
+  N8N -.-&gt; EXT[&quot;Новая почта · Telegram&lt;br/&gt;Google Sheets · OpenAI&quot;]
+</pre></div>
+<p><strong>Как ходит запрос (кратко).</strong> Покупатель входит через Auth и получает JWT. Витрина шлёт его в Product API в заголовке <code>Authorization: Bearer …</code>. Product API сам проверяет подпись токена (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Extensions/JwtAuthenticationService.cs#L26-L40" target="_blank" rel="noopener" class="gh">JwtAuthenticationService.cs</a>) и берёт из него <code>UserId</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Auth/AuthClaims.cs#L13-L22" target="_blank" rel="noopener" class="gh">AuthClaims.cs</a>). Своей таблицы пользователей в Product DB нет: email и имя Product API при необходимости спрашивает у Auth по внутреннему каналу (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/AuthInternalClient.cs#L64-L96" target="_blank" rel="noopener" class="gh">AuthInternalClient.cs</a>). Этот же приём, «сервис получает свой токен», нужен и для n8n: см. <a href="#api-2">сервисный токен, API-2</a>.</p>
+<p><strong>Что важно для автоматизации</strong> ✅:</p>
+<ul>
+<li>уже есть <strong>письма</strong> покупателю при заказе и смене статуса (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/OrderService.cs#L357-L368" target="_blank" rel="noopener" class="gh">OrderService.cs</a>, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/OrderService.cs#L387-L403" target="_blank" rel="noopener" class="gh">строки 387–403</a>). Значит, точки «заказ создан» и «статус изменился» в коде уже есть, к ним легко прицепить вебхук (<a href="#api-1">API-1</a>);</li>
+<li>при заказе остаток <strong>списывается</strong> и товар уходит в <code>OutOfStock</code> на нуле (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/OrderService.cs#L344-L351" target="_blank" rel="noopener" class="gh">строки 344–351</a>);</li>
+<li>есть подписка «сообщить о поступлении», но <strong>письмо о поступлении никто не отправляет</strong>: поле <code>NotifiedAtUtc</code> нигде в коде не заполняется (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Domain/Entities/StockNotifyRequest.cs#L19-L20" target="_blank" rel="noopener" class="gh">StockNotifyRequest.cs</a>). Готовая быстрая победа для <a href="#a2">А2</a>;</li>
+<li>есть <code>/api/health</code> для мониторинга (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Program.cs#L180-L194" target="_blank" rel="noopener" class="gh">Program.cs</a>) и dev-вход администратора для локальных демо (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/DevAdminAuthController.cs#L39-L45" target="_blank" rel="noopener" class="gh">DevAdminAuthController.cs</a>), его используют <a href="#portfolio">портфолио-воркфлоу</a>.</li>
+</ul>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#screens">→ далее: Как выглядит Perry сейчас</a></p>
+<hr />
+<h2><a id="screens"></a>3. Как выглядит Perry сейчас</h2>
+<p>Здесь 19 настоящих скриншотов проекта. Под каждым: <strong>что это за экран</strong>, <strong>что он делает</strong>, <strong>какой API за ним стоит</strong> и <strong>какие автоматизации к нему привязаны</strong> (ссылки ведут в потоки А–Д, а оттуда есть ссылки обратно сюда).</p>
+<blockquote>
+<p><strong>Источник скриншотов.</strong> Скрины с датой 04.10.2026 лежат в репозитории в <a href="https://github.com/Teslyar75/My_Amazon2/tree/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04" target="_blank" rel="noopener" class="gh"><code>docs/screenshots/2026-10-04/</code></a>: под каждым дана прямая ссылка на файл на коммите <code>bcaec5f</code>. Кадры спринта 19.09.2026 и мобильный скрин взяты из локальной копии <code>D:\Perry\My_Amazon2</code>. На коммите <code>bcaec5f</code> этих файлов в репозитории нет, поэтому GitHub-ссылки под ними не даём. Картинки сжаты до ширины 1024 px (JPG) и лежат рядом с документом в <code>img/</code>.</p>
+<p>⚠️ Замечание: в папке спринта 19.09 имена трёх файлов не совпадают с содержимым. <code>12-account-my-orders.png</code> на самом деле показывает модерацию отзывов, <code>13-admin-reviews-approve.png</code> показывает модалку заказа, а <code>14-account-order-details-modal.png</code> — список «My orders». Подписи ниже сделаны <strong>по тому, что на картинке</strong>.</p>
+</blockquote>
+<h3><a id="scr-g-front"></a>3.1. Витрина: путь покупателя</h3>
+<h4><a id="scr-home"></a>Рис. 1. Главная</h4>
+<figure><img src="img/01-home.jpg" alt="Главная Perry: баннер Sale -50%, категории, Trending deals со скидками и карточкой Out of stock" / loading="lazy"></figure>
+<p><em>Источник: <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/home/01-home-hero.png" target="_blank" rel="noopener" class="gh">docs/screenshots/2026-10-04/home/01-home-hero.png</a></em></p>
+<ul>
+<li><strong>Что видно:</strong> синяя шапка с поиском, иконки аккаунта, избранного и корзины (на значке 6 товаров). Баннер-карусель «Upgrade kitchenware today — Sale −50 %». Карточки категорий (Electronics, Fashion и тестовая «QA Cat…»). Блок <strong>Trending deals</strong> с бейджами «−20 %» и одной карточкой <strong>Out of stock / Notify when available</strong>.</li>
+<li><strong>API:</strong> категории — <code>GET /api/categories</code>, товары — <code>GET /api/products</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/frontend/src/api/index.ts#L222-L233" target="_blank" rel="noopener" class="gh">frontend/src/api/index.ts</a>). Кнопка Notify шлёт <code>POST /api/products/{id}/notify</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/StockNotifyController.cs#L36-L79" target="_blank" rel="noopener" class="gh">StockNotifyController.cs</a>).</li>
+<li><strong>Автоматизация:</strong> письмо «товар снова в наличии» подписчикам Notify (<a href="#a2">А2</a>); баннеры и подборки «Trending deals» из акций, собранные AI (<a href="#v1">В1</a>); тестовые категории вроде «QA Cat…» ловит ежедневная проверка витрины (<a href="#d2">Д2</a>).</li>
+</ul>
+<h4><a id="scr-catalog"></a>Рис. 2. Каталог с фильтрами</h4>
+<figure><img src="img/06-catalog.jpg" alt="Каталог Fashion: фильтры Brand и Fabric type слева, 28 товаров, сортировка From expensive to cheap" / loading="lazy"></figure>
+<p><em>Источник: <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/catalog/06-catalog-fashion.png" target="_blank" rel="noopener" class="gh">docs/screenshots/2026-10-04/catalog/06-catalog-fashion.png</a></em></p>
+<ul>
+<li><strong>Что видно:</strong> раздел Fashion, 28 результатов, сетка карточек (фото, название, звёзды, число отзывов, цена и старая цена). Слева фильтры <a href="#g-facet">фасеты</a>: <strong>Brand</strong> (Abardsion, Amazon, Apple…) и <strong>Fabric type</strong> (Cotton, Elastane, Linen…). Сортировка «From expensive to cheap».</li>
+<li><strong>API:</strong> <code>GET /api/products?categoryId=…&amp;brands=…&amp;fabrics=…&amp;sort=…</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L43-L58" target="_blank" rel="noopener" class="gh">ProductsController.cs</a>). Значения фильтров API собирает из характеристик с флагом <code>IsFilterable</code>, и имена жёстко заданы: «Fabric type», «Size», «Color» (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L147-L175" target="_blank" rel="noopener" class="gh">строки 147–175</a>).</li>
+<li><strong>Автоматизация:</strong> нормализация характеристик, чтобы фильтры не «рассыпались» на «cotton / Cotton / хлопок» (<a href="#b2">Б2</a>); мониторинг цен конкурентов и скидок (<a href="#b4">Б4</a>).</li>
+</ul>
+<h4><a id="scr-product"></a>Рис. 3. Карточка товара</h4>
+<figure><img src="img/07-product.jpg" alt="Карточка Nike Air Jordan 1: галерея, рейтинг 4, 20 отзывов, код DJ-088, описание, цена 149.99, In stock, Buy now, Add to cart" / loading="lazy"></figure>
+<p><em>Источник: <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/product/07-product-nike-pdp.png" target="_blank" rel="noopener" class="gh">docs/screenshots/2026-10-04/product/07-product-nike-pdp.png</a></em></p>
+<ul>
+<li><strong>Что видно:</strong> галерея из 4 фото, бейдж «−20 %», название, 4 звезды и 20 отзывов, код (SKU) <strong>DJ-088</strong>, аккордеон <strong>Description</strong> с коротким описанием. Справа: цена $149.99 (старая $187.49), статус <strong>In stock</strong>, Delivery, Payment methods, Returns, About seller, количество, <strong>Buy now / Add to cart / Add to wish list</strong>.</li>
+<li><strong>API:</strong> <code>GET /api/products/{id}</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L250-L251" target="_blank" rel="noopener" class="gh">ProductsController.cs</a>), добавление в корзину — <code>POST /api/cart/add</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/CartController.cs#L61-L62" target="_blank" rel="noopener" class="gh">CartController.cs</a>).</li>
+<li><strong>Автоматизация:</strong> AI-описание и SEO-тексты (<a href="#b1">Б1</a>, портфолио <a href="#pf-3">ПФ-3</a>); обработка фото: фон, размер, alt-текст (<a href="#b3">Б3</a>); блоки Delivery и Returns заполняются из правил доставки «Новой почты» (<a href="#a4">А4</a>, <a href="#a6">А6</a>).</li>
+</ul>
+<h4><a id="scr-specs"></a>Рис. 4. Характеристики и отзывы на карточке</h4>
+<figure><img src="img/09-specs.jpg" alt="Product details: несколько Color, Size и Fabric type; блок Customer reviews 4/5, 9 отзывов, Frequent tags, Helpful и Translate" / loading="lazy"></figure>
+<p><em>Источник: <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/product/09-product-specs-reviews.png" target="_blank" rel="noopener" class="gh">docs/screenshots/2026-10-04/product/09-product-specs-reviews.png</a></em></p>
+<ul>
+<li><strong>Что видно:</strong> таблица <strong>Product details</strong>: три значения Color (Beige, Navy, Cream), три Size (2XL, 3XL, XS) и четыре <strong>Fabric type</strong> (Polyamide, Elastane, Polyester, Linen), хотя это кроссовки. Ниже рейтинг 4/5, распределение звёзд, <strong>Frequent tags</strong>, кнопки <strong>Helpful</strong> и <strong>Translate</strong>.</li>
+<li><strong>Наблюдение ✅ по скриншоту:</strong> характеристики похожи на «шум» демо-данных. Для живого магазина это и есть ручная работа <a href="#b2">Б2</a>: кто-то должен проверять, что у обуви нет «ткани Linen».</li>
+<li><strong>API:</strong> характеристики приходят в <code>GET /api/products/{id}</code> из <code>ProductAttribute</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Domain/Entities/ProductAttribute.cs#L8-L26" target="_blank" rel="noopener" class="gh">ProductAttribute.cs</a>).</li>
+<li><strong>Автоматизация:</strong> AI-проверка и нормализация характеристик (<a href="#b2">Б2</a>); анализ тегов и отзывов (<a href="#v5">В5</a>).</li>
+</ul>
+<h4><a id="scr-reviews"></a>Рис. 5. Отзывы покупателей</h4>
+<figure><img src="img/10-reviews.jpg" alt="Customer reviews: 4/5, 45 отзывов, отзыв на русском, отзыв с пометкой Translated to Ukrainian, Helpful, Show original" / loading="lazy"></figure>
+<p><em>Источник: <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/product/10-product-reviews.png" target="_blank" rel="noopener" class="gh">docs/screenshots/2026-10-04/product/10-product-reviews.png</a></em></p>
+<ul>
+<li><strong>Что видно:</strong> 45 отзывов, фильтр по звёздам, <strong>+ Create review</strong>. Один отзыв переведён на украинский («Translated to Ukrainian», кнопка <strong>Show original</strong>), счётчик «25 people found this helpful». У одного отзыва вместо имени автора показан <strong>email</strong>.</li>
+<li><strong>API:</strong> <code>GET /api/reviews</code> (публично только одобренные), <code>POST /api/reviews</code>, «Helpful» — <code>POST /api/reviews/grade/{id}</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ReviewController.cs#L96-L117" target="_blank" rel="noopener" class="gh">ReviewController.cs</a>). Перевод делает сам фронт через бесплатный MyMemory (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/frontend/src/utils/translateToUk.ts#L1-L3" target="_blank" rel="noopener" class="gh">translateToUk.ts</a>).</li>
+<li><strong>Автоматизация:</strong> AI-модерация отзывов: спам, оскорбления, не по теме, <strong>личные данные (email) вместо имени</strong> (<a href="#v5">В5</a>); запрос отзыва после доставки (<a href="#final-steps">final, шаг 8</a>).</li>
+</ul>
+<h4><a id="scr-cart"></a>Рис. 6. Корзина</h4>
+<figure><img src="img/11-cart.jpg" alt="Shopping cart: Rolex, MotoGP, Chanel, Women's Wrist Watch, Argon; Order summary 7 items, Total 46474.23, Proceed to checkout" / loading="lazy"></figure>
+<p><em>Источник: <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/cart-checkout/11-cart.png" target="_blank" rel="noopener" class="gh">docs/screenshots/2026-10-04/cart-checkout/11-cart.png</a></em></p>
+<ul>
+<li><strong>Что видно:</strong> позиции с полем Qty и ссылкой Remove, <strong>Order summary</strong>: 7 товаров, итог $46 474.23, кнопка <strong>Proceed to checkout</strong>.</li>
+<li><strong>API:</strong> <code>GET /api/cart</code>, <code>PUT /api/cart/quantity</code>, <code>DELETE /api/cart/item/{id}</code>. Гостевая корзина живёт по <code>sessionId</code>, после входа сливается: <code>POST /api/cart/merge</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/CartController.cs#L116-L130" target="_blank" rel="noopener" class="gh">CartController.cs</a>). У корзины есть <code>UpdatedAtUtc</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Domain/Entities/Cart.cs#L11-L19" target="_blank" rel="noopener" class="gh">Cart.cs</a>).</li>
+<li><strong>Автоматизация:</strong> напоминание о брошенной корзине (<a href="#v3">В3</a>). Нужен новый эндпоинт: <a href="#api-7">API-7</a>.</li>
+</ul>
+<h4><a id="scr-checkout"></a>Рис. 7. Оформление заказа</h4>
+<figure><img src="img/12-checkout.jpg" alt="Checkout: Recipient information, Delivery address с выбором страны (Ukraine), Cash или Card, Summary, Place order" / loading="lazy"></figure>
+<p><em>Источник: <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/cart-checkout/12-checkout-country.png" target="_blank" rel="noopener" class="gh">docs/screenshots/2026-10-04/cart-checkout/12-checkout-country.png</a></em></p>
+<ul>
+<li><strong>Что видно:</strong> имя, фамилия, email; <strong>Delivery address</strong>: Country (выбрана Ukraine), State, City, Postcode; оплата <strong>Cash / Card</strong> (демо, без реального списания); <strong>Place order</strong>. На соседнем кадре <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/cart-checkout/13-checkout-state-ua.png" target="_blank" rel="noopener" class="gh">13-checkout-state-ua</a> видно выпадающий список областей Украины.</li>
+<li><strong>API:</strong> <code>POST /api/orders/checkout</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/OrdersController.cs#L52-L75" target="_blank" rel="noopener" class="gh">OrdersController.cs</a>). Страна по умолчанию — Ukraine (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/frontend/src/pages/CheckoutPage.tsx#L299-L301" target="_blank" rel="noopener" class="gh">CheckoutPage.tsx</a>). Адрес склеивается в одну строку «город, область, индекс, страна» (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/frontend/src/pages/CheckoutPage.tsx#L390" target="_blank" rel="noopener" class="gh">строка 390</a>).</li>
+<li><strong>Наблюдение ✅:</strong> <strong>нет телефона и отделения «Новой почты»</strong>, а без них накладную не создать. Это первое, что нужно добавить для <a href="#a4">А4</a> (<a href="#api-5">API-5</a>).</li>
+<li><strong>Автоматизация:</strong> проверка адреса и выбор отделения по справочнику НП (<a href="#a4">А4</a>); событие «заказ создан» запускает весь <a href="#final">конвейер от заказа до доставки</a>.</li>
+</ul>
+<h4><a id="scr-my-orders"></a>Рис. 8. Кабинет: «Мои заказы»</h4>
+<figure><img src="img/s-my-orders.jpg" alt="My orders: три заказа #918320, #773162 (Ordered), #118663 (Ready for pickup), суммы и кнопки Details" / loading="lazy"></figure>
+<p><em>Источник: локальная копия <code>D:\Perry\My_Amazon2</code>, спринт 19.09.2026 (файл <code>14-account-order-details-modal.png</code>). В репозитории на коммите <code>bcaec5f</code> не найден.</em></p>
+<ul>
+<li><strong>Что видно:</strong> список заказов с номером, статусом (<strong>Ordered</strong>, <strong>Ready for pickup</strong>), датой, количеством товаров и суммой, кнопка <strong>Details</strong>.</li>
+<li><strong>API:</strong> <code>GET /api/orders</code> — только свои заказы (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/OrdersController.cs#L29-L38" target="_blank" rel="noopener" class="gh">OrdersController.cs</a>). Статусы: Ordered, Received, Shipped, ReadyToPickup, Cancelled, Returned (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Domain/Enums/OrderStatus.cs#L7-L23" target="_blank" rel="noopener" class="gh">OrderStatus.cs</a>).</li>
+<li><strong>Автоматизация:</strong> статус «Shipped» и номер <a href="#g-ttn">ТТН</a> подставляются сами из трекинга «Новой почты» (<a href="#a5">А5</a>); этот же статус отвечает <a href="#g1">бот поддержки</a>.</li>
+</ul>
+<h4><a id="scr-order-modal"></a>Рис. 9. Детали заказа</h4>
+<figure><img src="img/s-order-modal.jpg" alt="Модалка Order #773162: две позиции, Total 668.00, How to cancel order?, Additional information: имя, адрес, Cash, дата" / loading="lazy"></figure>
+<p><em>Источник: локальная копия <code>D:\Perry\My_Amazon2</code>, спринт 19.09.2026 (файл <code>13-admin-reviews-approve.png</code>, по содержимому это модалка заказа). В репозитории на коммите <code>bcaec5f</code> не найден.</em></p>
+<ul>
+<li><strong>Что видно:</strong> состав заказа, итог, кнопка <strong>How to cancel order?</strong>, блок <strong>Additional information</strong>: получатель, адрес «Canada, Ontario, Something Street, 1919», оплата Cash, дата.</li>
+<li><strong>Наблюдение ✅:</strong> этот адрес — значение по умолчанию в коде, если покупатель адрес не передал (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/OrderService.cs#L278-L284" target="_blank" rel="noopener" class="gh">OrderService.cs</a>). Для реальной доставки нужна валидация (<a href="#a4">А4</a>, <a href="#api-5">API-5</a>).</li>
+<li><strong>Автоматизация:</strong> ответ на «как отменить заказ» даёт <a href="#g2">FAQ-бот</a>; возврат запускает <a href="#a6">А6</a>.</li>
+</ul>
+<h4><a id="scr-wishlist"></a>Рис. 10. Избранное (Wishlist)</h4>
+<figure><img src="img/16-wishlist.jpg" alt="Wishlist: три товара, сайдбар кабинета My orders, Wishlist, My reviews, Account settings; футер Support, Legal notice, Social media" / loading="lazy"></figure>
+<p><em>Источник: <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/account/16-account-wishlist.png" target="_blank" rel="noopener" class="gh">docs/screenshots/2026-10-04/account/16-account-wishlist.png</a></em></p>
+<ul>
+<li><strong>Что видно:</strong> три товара в избранном (два со скидкой), меню кабинета, футер с <strong>Contact us, FAQ</strong> и иконками соцсетей (Facebook, X, Instagram, email, Telegram).</li>
+<li><strong>API:</strong> <code>GET/POST/DELETE /api/wishlist</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/WishlistController.cs#L12-L22" target="_blank" rel="noopener" class="gh">WishlistController.cs</a>); для админа есть сводка «что чаще добавляют» — <code>GET /api/admin/wishlist/summary</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/AdminWishlistController.cs#L101-L106" target="_blank" rel="noopener" class="gh">AdminWishlistController.cs</a>).</li>
+<li><strong>Автоматизация:</strong> письмо «товар из вашего избранного подешевел» (<a href="#v4">В4</a>); топ wishlist в еженедельном маркетинг-отчёте (<a href="#v7">В7</a>); ссылка Telegram в футере ведёт к <a href="#g1">боту поддержки</a>.</li>
+</ul>
+<h3><a id="scr-g-auth"></a>3.2. Вход и регистрация (Auth)</h3>
+<h4><a id="scr-login"></a>Рис. 11. Вход</h4>
+<figure><img src="img/22-login.jpg" alt="Welcome back: Email, Password, Stay signed in, Forgot password, Log in, Sign up" / loading="lazy"></figure>
+<p><em>Источник: <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/auth/22-auth-login.png" target="_blank" rel="noopener" class="gh">docs/screenshots/2026-10-04/auth/22-auth-login.png</a></em></p>
+<ul>
+<li><strong>Что видно:</strong> форма входа (Email, Password, Stay signed in, Forgot password?), иллюстрация в стиле бренда. Рядом в репозитории кадры регистрации, подтверждения email 6-значным кодом и восстановления пароля (<a href="https://github.com/Teslyar75/My_Amazon2/tree/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/auth" target="_blank" rel="noopener" class="gh">папка auth</a>).</li>
+<li><strong>API:</strong> Auth Service (зона Влада), фронт ходит через прокси <code>/auth-api</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/frontend/src/api/client.ts#L29-L36" target="_blank" rel="noopener" class="gh">client.ts</a>).</li>
+<li><strong>Автоматизация:</strong> напрямую не трогаем, это чужая зона. Используем Auth только чтобы n8n получил <strong>сервисный токен</strong> (<a href="#api-2">API-2</a>), и для приветственной серии писем после регистрации (<a href="#v4">В4</a>, ❓ нужен вебхук «пользователь зарегистрирован» от Auth: <a href="#q5">вопрос 5</a>).</li>
+</ul>
+<h3><a id="scr-g-admin"></a>3.3. Админка</h3>
+<h4><a id="scr-admin-dashboard"></a>Рис. 12. Панель администратора</h4>
+<figure><img src="img/34-admin-dashboard.jpg" alt="Admin dashboard: пять плиток Products, Categories, Reviews, Orders, Users" / loading="lazy"></figure>
+<p><em>Источник: <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/admin/34-admin-dashboard.png" target="_blank" rel="noopener" class="gh">docs/screenshots/2026-10-04/admin/34-admin-dashboard.png</a></em></p>
+<ul>
+<li><strong>Что видно:</strong> пять плиток: <strong>Products</strong> (create and edit catalog items), <strong>Categories</strong>, <strong>Reviews</strong> (moderate customer reviews), <strong>Orders</strong> (track and update orders), <strong>Users</strong> (browse accounts, Admin API). Цифр (выручка, остатки) на панели нет.</li>
+<li><strong>Автоматизация:</strong> то, чего нет на панели, приходит в Telegram: ежедневный <a href="#d1">KPI-дайджест</a> и <a href="#d2">алерты об аномалиях</a>. В будущем сюда же встраивается окно <strong>одобрений</strong> от AI-агента (<a href="#agents-hitl">раздел 11</a>).</li>
+</ul>
+<h4><a id="scr-admin-products"></a>Рис. 13. Товары</h4>
+<figure><img src="img/35-admin-products.jpg" alt="Admin Products: фильтр Category, поиск, таблица с фото, названием, рейтингом и ценой, справа галерея выбранного товара" / loading="lazy"></figure>
+<p><em>Источник: <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/admin/35-admin-products.png" target="_blank" rel="noopener" class="gh">docs/screenshots/2026-10-04/admin/35-admin-products.png</a></em></p>
+<ul>
+<li><strong>Что видно:</strong> фильтр по категории, поиск, таблица (миниатюра, название, рейтинг, цена и старая цена), кнопка «+», справа галерея выбранного товара. <strong>Колонки «остаток» в списке нет.</strong></li>
+<li><strong>API:</strong> <code>GET /api/products</code>; в ответе списка есть <code>Status</code>, но нет <code>StockQuantity</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L112-L139" target="_blank" rel="noopener" class="gh">ProductsController.cs</a>). Остаток отдаёт только <code>GET /api/products/update/{id}</code> по одному товару (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L187-L211" target="_blank" rel="noopener" class="gh">строки 186–211</a>).</li>
+<li><strong>Автоматизация:</strong> синхронизация остатков с поставщиками (<a href="#a1">А1</a>), алерты «мало на складе» (<a href="#a2">А2</a>). Для них нужен эндпоинт остатков (<a href="#api-3">API-3</a>).</li>
+</ul>
+<h4><a id="scr-admin-create"></a>Рис. 14. Создание товара</h4>
+<figure><img src="img/36-admin-create-product.jpg" alt="Create product: General information: Name, Code, Category, Product display 0/10, Price, Discount, Number; ниже Product details и About product" / loading="lazy"></figure>
+<p><em>Источник: <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/admin/36-admin-create-product.png" target="_blank" rel="noopener" class="gh">docs/screenshots/2026-10-04/admin/36-admin-create-product.png</a></em></p>
+<ul>
+<li><strong>Что видно:</strong> форма в три блока (General information, Product details, About product): Name, Code, Category, до 10 фото, Price $, Discount %, <strong>Number</strong> (количество на складе).</li>
+<li><strong>API:</strong> <code>POST /api/products</code> и <code>PUT /api/products/{id}</code> с ролями Admin или Seller (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L545-L594" target="_blank" rel="noopener" class="gh">ProductsController.cs</a>).</li>
+<li><strong>Автоматизация:</strong> именно эту форму человек сейчас заполняет руками ≈ 25 минут на товар ⚠️. AI-агент заполняет черновик из прайса поставщика (описание, характеристики, about), человек проверяет (<a href="#b1">Б1</a>, <a href="#b2">Б2</a>, <a href="#b3">Б3</a>).</li>
+</ul>
+<h4><a id="scr-admin-categories"></a>Рис. 15. Категории</h4>
+<figure><img src="img/37-admin-categories.jpg" alt="Admin Categories: дерево Electronics, Fashion &gt; Women's fashion &gt; Casual Women's Clothing &gt; Tops, Tees &amp; Blouses &gt; T-Shirts, карточка категории справа" / loading="lazy"></figure>
+<p><em>Источник: <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/admin/37-admin-categories.png" target="_blank" rel="noopener" class="gh">docs/screenshots/2026-10-04/admin/37-admin-categories.png</a></em></p>
+<ul>
+<li><strong>Что видно:</strong> дерево категорий до 5 уровней (Fashion → Women's fashion → Casual Women's Clothing → Tops, Tees &amp; Blouses → T-Shirts), справа фото, описание «Shop T-Shirts at Perry — curated picks…», статус Active, роль, родитель. Вверху тестовые «QA Cat / QA Child».</li>
+<li><strong>API:</strong> <code>GET/POST/PUT/DELETE /api/categories</code> (запись только Admin) (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/CategoriesController.cs#L162-L163" target="_blank" rel="noopener" class="gh">CategoriesController.cs</a>).</li>
+<li><strong>Автоматизация:</strong> AI предлагает категорию для нового товара и SEO-описание категории (<a href="#b1">Б1</a>); проверка «тестовые категории на витрине» (<a href="#d2">Д2</a>).</li>
+</ul>
+<h4><a id="scr-admin-reviews"></a>Рис. 16. Модерация отзывов</h4>
+<figure><img src="img/39-admin-reviews.jpg" alt="Admin Reviews: фильтры All, Hidden, Visible; в колонке Product GUID, в Author email или GUID; справа скрытый отзыв не по теме, кнопки Approve и Delete" / loading="lazy"></figure>
+<p><em>Источник: <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/admin/39-admin-reviews.png" target="_blank" rel="noopener" class="gh">docs/screenshots/2026-10-04/admin/39-admin-reviews.png</a></em></p>
+<ul>
+<li><strong>Что видно:</strong> фильтры All / Hidden / Visible, таблица Product / Author / Rating / Status. В колонке Product показан <strong>GUID товара</strong> вместо названия, в Author — email или GUID. Справа открыт скрытый отзыв с текстом, который <strong>не относится к товару</strong>, и кнопки <strong>Approve / Delete</strong>.</li>
+<li><strong>API:</strong> <code>GET /api/reviews</code> (админ видит и скрытые), <code>PATCH /api/reviews/disable-many</code>, <code>DELETE /api/reviews/{id}</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ReviewController.cs#L239-L262" target="_blank" rel="noopener" class="gh">ReviewController.cs</a>); на фронте — <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/frontend/src/api/index.ts#L143-L201" target="_blank" rel="noopener" class="gh">index.ts</a>.</li>
+<li><strong>Автоматизация:</strong> AI-модератор ставит каждому новому отзыву метку (ок / спам / не по теме / личные данные / жалоба на доставку) и предлагает решение; человек жмёт Approve или Delete уже по готовой подсказке (<a href="#v5">В5</a>). Жалобы на доставку уходят в <a href="#a6">А6</a> и <a href="#g3">Г3</a>.</li>
+</ul>
+<h4><a id="scr-admin-orders"></a>Рис. 17. Заказы</h4>
+<figure><img src="img/40-admin-orders.jpg" alt="Admin Orders: поиск по #AT456BB, фильтры Status, From, To, Apply dates, This month, All time; Orders 7, Total 30008.19; счётчики статусов; список заказов" / loading="lazy"></figure>
+<p><em>Источник: <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/admin/40-admin-orders.png" target="_blank" rel="noopener" class="gh">docs/screenshots/2026-10-04/admin/40-admin-orders.png</a></em></p>
+<ul>
+<li><strong>Что видно:</strong> поиск «by #AT456BB or orderId», фильтры статуса и дат, итоги <strong>Orders 7 · Total $30 008.19</strong>, счётчики Ordered 2 / Received 1 / Shipped 2 / ReadyToPickup 1 / Cancelled 1 / Returned 0, список с номером, датой, покупателем, статусом, суммой. На кадре спринта 19.09 (<code>10-admin-orders-details.png</code>, локальная копия) справа видно смену статуса выпадающим списком.</li>
+<li><strong>API:</strong> <code>GET /api/orders/admin</code> с фильтрами и готовыми <code>statusCounts</code>, <code>totalAmount</code>, сравнением периодов (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/OrdersController.cs#L82-L160" target="_blank" rel="noopener" class="gh">OrdersController.cs</a>); смена статуса — <code>PUT /api/orders/{id}/status</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/OrdersController.cs#L162-L171" target="_blank" rel="noopener" class="gh">строки 162–171</a>). Поиск по номеру <code>#AT456BB</code> работает через параметр <code>orderId</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/OrderService.cs#L121-L138" target="_blank" rel="noopener" class="gh">OrderService.cs</a>).</li>
+<li><strong>Автоматизация:</strong> <strong>главный источник данных</strong> для <a href="#d1">KPI-дайджеста</a> (без доработок API), <a href="#a3">сборочных листов</a>, <a href="#a4">ТТН</a> и <a href="#g1">бота «где мой заказ»</a>.</li>
+</ul>
+<h4><a id="scr-admin-users"></a>Рис. 18. Пользователи</h4>
+<figure><img src="img/41-admin-users.jpg" alt="Admin Users: фильтр Role, Active, Deleted, All status, поиск, Columns; таблица Name, Email, Role, Status" / loading="lazy"></figure>
+<p><em>Источник: <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04/admin/41-admin-users.png" target="_blank" rel="noopener" class="gh">docs/screenshots/2026-10-04/admin/41-admin-users.png</a></em></p>
+<ul>
+<li><strong>Что видно:</strong> роли (Admin, User), статусы Active / Deleted, настройка колонок.</li>
+<li><strong>API:</strong> не Product API, а отдельный <strong>Admin Service</strong> (<code>/users-api</code>, <code>/api/admin/users</code>) (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/frontend/src/api/index.ts#L600-L655" target="_blank" rel="noopener" class="gh">index.ts</a>).</li>
+<li><strong>Автоматизация:</strong> сегменты для рассылок (активные покупатели, без заказов 30 дней) (<a href="#v4">В4</a>). ❓ Доступ n8n к Admin Service нужно согласовать с владельцем (<a href="#q4">вопрос 4</a>). Персональные данные покупателей в AI-модель <strong>не отправляем</strong> (<a href="#r5">риск R5</a>).</li>
+</ul>
+<h3><a id="scr-g-mobile"></a>3.4. Мобильное приложение</h3>
+<h4><a id="scr-mobile"></a>Рис. 19. Главная в мобильном приложении (Expo)</h4>
+<figure><img src="img/mobile-home.jpg" alt="Мобильная главная: шапка с поиском и корзиной, баннер Beach Ready Sale on swimsuits, категория Electronics, Trending deals, нижнее меню Home, Catalog, Cart, Account" / loading="lazy"></figure>
+<p><em>Источник: локальная копия <code>D:\Perry\My_Amazon2</code> (файл <code>mobile-home.png</code>). В репозитории на коммите <code>bcaec5f</code> не найден. Код приложения — <a href="https://github.com/Teslyar75/My_Amazon2/tree/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/mobile/src/screens" target="_blank" rel="noopener" class="gh">mobile/src/screens</a>.</em></p>
+<ul>
+<li><strong>Что видно:</strong> та же шапка, баннер «Beach Ready — Sale on swimsuits», карточка Electronics, <strong>Trending deals</strong> с тестовыми товарами «Smoke A12 / A11 Product» (картинки не загрузились), нижнее меню Home / Catalog / Cart / Account.</li>
+<li><strong>API:</strong> тот же Product API (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/mobile/src/api/client.ts" target="_blank" rel="noopener" class="gh">mobile/src/api/client.ts</a>).</li>
+<li><strong>Автоматизация:</strong> любые изменения каталога из <a href="#stream-b">Б</a> сразу видны и в мобильном. Тестовые товары и пустые картинки на витрине ловит <a href="#d2">Д2</a>. Push-уведомления о статусе заказа ❓ — в будущем, после <a href="#api-1">API-1</a>.</li>
+</ul>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#modules">→ далее: Части проекта подробно</a></p>
+<hr />
+<h2><a id="modules"></a>4. Части проекта подробно</h2>
+<p>Для каждой части: <strong>что это</strong>, <strong>как выглядит</strong>, <strong>что делает</strong>, <strong>какой API</strong>, <strong>где её касается автоматизация</strong>.</p>
+<h3><a id="mod-front"></a>4.1. Витрина (frontend, React + Vite)</h3>
+<ul>
+<li><strong>Что это:</strong> одностраничное приложение (<a href="#g-spa">SPA</a>) на React 19, макет по Figma. Запуск — <code>localhost:3000</code>, запросы <code>/api</code> проксируются на Product API <code>:5272</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/README.md#L34" target="_blank" rel="noopener" class="gh">README</a>).</li>
+<li><strong>Как выглядит:</strong> <a href="#scr-home">рис. 1–10</a>: синяя шапка с поиском, светлые карточки, салатовые кнопки.</li>
+<li><strong>Что делает:</strong> маршруты главной, каталога, товара, корзины, checkout, кабинета, legal и 404 (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/frontend/src/app/router.tsx#L37-L74" target="_blank" rel="noopener" class="gh">router.tsx</a>); админка живёт в том же приложении под <code>/admin</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/frontend/src/app/router.tsx#L101-L114" target="_blank" rel="noopener" class="gh">строки 101–114</a>).</li>
+<li><strong>API:</strong> все вызовы собраны в одном файле <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/frontend/src/api/index.ts" target="_blank" rel="noopener" class="gh">frontend/src/api/index.ts</a>.</li>
+<li><strong>Автоматизация:</strong> витрину почти не меняем. Добавляем телефон и отделение НП в checkout (<a href="#api-5">API-5</a>), трекинг-номер в «Мои заказы» (<a href="#a5">А5</a>), позже виджет чата с ботом (<a href="#g1">Г1</a>).</li>
+</ul>
+<h3><a id="mod-api"></a>4.2. Product API (зона Сергея)</h3>
+<ul>
+<li><strong>Что это:</strong> REST-сервис на ASP.NET Core 8, три слоя: <code>Perry.Api</code> (контроллеры), <code>Perry.Domain</code> (сущности), <code>Perry.Infrastructure</code> (БД, сервисы). Swagger на <code>/swagger</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Program.cs#L153-L159" target="_blank" rel="noopener" class="gh">Program.cs</a>).</li>
+<li><strong>Как выглядит:</strong> экрана нет, его «лицо» — Swagger. Данные видны на всех экранах витрины.</li>
+<li><strong>Что делает:</strong> каталог с фильтрами, карточка, корзина гостя и пользователя, checkout со списанием остатков, статусы заказа с письмами, отзывы с модерацией, wishlist, подписка «сообщить о поступлении», health-check.</li>
+<li><strong>Сущности:</strong> товар с SKU, ценой, старой ценой, <strong>остатком</strong> и статусом (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Domain/Entities/Product.cs#L40-L50" target="_blank" rel="noopener" class="gh">Product.cs</a>); заказ с номером <code>#AT456BB</code>, суммой, адресом, оплатой (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Domain/Entities/Order.cs#L8-L45" target="_blank" rel="noopener" class="gh">Order.cs</a>); позиция заказа со «снимком» цены и названия (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Domain/Entities/OrderItem.cs#L6-L33" target="_blank" rel="noopener" class="gh">OrderItem.cs</a>); отзыв с оценкой 1–5 и флагом <code>IsApproved</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Domain/Entities/ProductReview.cs#L27-L37" target="_blank" rel="noopener" class="gh">ProductReview.cs</a>).</li>
+<li><strong>Права:</strong> политики <code>AdminAccess</code> и <code>SellerAccess</code> по роли из JWT (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Program.cs#L135-L141" target="_blank" rel="noopener" class="gh">Program.cs</a>).</li>
+<li><strong>Автоматизация:</strong> <strong>главная точка интеграции</strong>. Все потоки А–Д читают данные отсюда, а <a href="#api-gaps">раздел 13</a> перечисляет, что сюда нужно добавить.</li>
+</ul>
+<h3><a id="mod-auth"></a>4.3. Auth-сервис (зона Влада)</h3>
+<ul>
+<li><strong>Что это:</strong> отдельный сервис в Azure: регистрация, вход, подтверждение email кодом, сброс пароля, выдача JWT (HS256, общий секрет с Product API).</li>
+<li><strong>Как выглядит:</strong> <a href="#scr-login">рис. 11</a> и кадры регистрации и кода.</li>
+<li><strong>Что делает для Product API:</strong> выдаёт <strong>сервисный токен</strong> по <code>POST /internal/auth/token</code> (имя сервиса + секрет из env) и отдаёт данные пользователя по <code>GET /internal/users/{id}</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/AuthInternalClient.cs#L21-L25" target="_blank" rel="noopener" class="gh">AuthInternalClient.cs</a>).</li>
+<li><strong>Автоматизация:</strong> просим у Влада отдельный сервисный аккаунт <code>n8n-automation</code> с узкими правами (<a href="#api-2">API-2</a>, <a href="#q3">вопрос 3</a>).</li>
+</ul>
+<h3><a id="mod-admin"></a>4.4. Админка (UI + Admin Service)</h3>
+<ul>
+<li><strong>Что это:</strong> раздел <code>/admin</code> той же витрины (<a href="https://github.com/Teslyar75/My_Amazon2/tree/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/frontend/src/pages/admin" target="_blank" rel="noopener" class="gh">frontend/src/pages/admin</a>) плюс отдельный <strong>Admin Service</strong> для пользователей. Бэкенд админки — зона другого участника команды.</li>
+<li><strong>Как выглядит:</strong> <a href="#scr-admin-dashboard">рис. 12–18</a>: светлая шапка, таблица слева, детали справа.</li>
+<li><strong>Что делает:</strong> товары, категории, модерация отзывов, заказы со сменой статуса, пользователи с ролями. Поток админских заказов на защите показан диаграммой <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/project_defense/views_project/16-admin-orders-flow.png" target="_blank" rel="noopener" class="gh">16-admin-orders-flow</a>: <code>GET /api/orders/admin</code> → <code>PUT /orders/{id}/status</code> → <code>UpdatedAtUtc</code>.</li>
+<li><strong>Автоматизация:</strong> админка становится местом, где человек <strong>одобряет</strong> то, что подготовил агент: черновики товаров, ответы на отзывы, закупки (<a href="#agents-hitl">раздел 11</a>). Пока окна одобрений нет, роль играет Telegram с кнопками.</li>
+</ul>
+<h3><a id="mod-mobile"></a>4.5. Мобильное приложение (Expo)</h3>
+<ul>
+<li><strong>Что это:</strong> React Native на Expo, экраны Home, Products, Product, Cart, Checkout, Orders, Order details, Account, Login, Register (<a href="https://github.com/Teslyar75/My_Amazon2/tree/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/mobile/src/screens" target="_blank" rel="noopener" class="gh">mobile/src/screens</a>). Токен хранится в <code>expo-secure-store</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/mobile/package.json" target="_blank" rel="noopener" class="gh">package.json</a>).</li>
+<li><strong>Как выглядит:</strong> <a href="#scr-mobile">рис. 19</a>.</li>
+<li><strong>Автоматизация:</strong> пользуется тем же API, поэтому получает плоды потоков А–Д бесплатно. ❓ Push-уведомления — после того как появятся вебхуки (<a href="#api-1">API-1</a>).</li>
+</ul>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#admin-ux">→ далее: Админка: что неудобно</a></p>
+<hr />
+<h2><a id="admin-ux"></a>5. Админка: что неудобно и что автоматизировать</h2>
+<p>Админка Perry аккуратная и рабочая, но сделана как «таблица + карточка справа»: <strong>каждое действие — руками, по одному объекту</strong>. Для дипломного проекта это нормально. Для магазина на 50 заказов в день ⚠️ это и есть те самые часы, которые ищет вакансия. Ниже разбор по каждому экрану: сначала <strong>что неудобно</strong> (✅ видно на скрине или в коде), потом <strong>что поправить в интерфейсе</strong> (дёшево, без AI) и <strong>что отдать автоматизации</strong>.</p>
+<blockquote>
+<p>Бэкенд админки и Admin Service — зона другого участника команды. Всё, что ниже касается их кода, это <strong>предложения для обсуждения</strong>, а не готовые решения (<a href="#q4">вопрос 4</a>).</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Экран</th>
+<th>Что неудобно сейчас</th>
+<th>Что улучшить в интерфейсе</th>
+<th>Что автоматизировать</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#scr-admin-dashboard">Панель</a></td>
+<td>✅ Только 5 плиток-ссылок, <strong>ни одной цифры</strong>: не видно выручки за день, новых заказов, товаров на нуле, отзывов на модерации</td>
+<td>Счётчики на плитках: «Orders: 12 новых», «Reviews: 7 ждут»</td>
+<td><a href="#d1">Д1</a> KPI-дайджест в Telegram каждое утро, <a href="#d2">Д2</a> алерты; позже — лента «ждёт вашего одобрения» от агента (<a href="#agents-hitl">раздел 11</a>)</td>
+</tr>
+<tr>
+<td><a href="#scr-admin-products">Товары</a></td>
+<td>✅ В списке <strong>нет колонки остатка</strong> и фильтра по статусу (Draft / OutOfStock). ✅ Нет массового редактирования и импорта из файла. ✅ Сохранение товара перезаписывает фото и характеристики целиком (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L617-L627" target="_blank" rel="noopener" class="gh">код</a>)</td>
+<td>Колонка «Stock», фильтр «мало на складе», массовая смена цены и статуса</td>
+<td><a href="#a1">А1</a> остатки и цены из прайсов поставщиков, <a href="#a2">А2</a> алерты и черновик закупки, <a href="#b4">Б4</a> цены конкурентов</td>
+</tr>
+<tr>
+<td><a href="#scr-admin-create">Создание товара</a></td>
+<td>✅ Всё заполняется руками: название, код, категория, до 10 фото, цена, скидка, количество, характеристики, about. ⚠️ ≈ 25 мин на товар</td>
+<td>Кнопка «Дублировать товар», шаблоны характеристик по категории</td>
+<td><a href="#b1">Б1</a> AI-черновик описания и SEO, <a href="#b2">Б2</a> характеристики из прайса, <a href="#b3">Б3</a> обработка фото. Человек только проверяет (<a href="#pf-3">ПФ-3</a>)</td>
+</tr>
+<tr>
+<td><a href="#scr-admin-categories">Категории</a></td>
+<td>✅ В боевом дереве видны тестовые «QA Cat / QA Child». Описание категории пишется вручную</td>
+<td>Флаг «скрыть с витрины», отдельная тестовая среда</td>
+<td><a href="#b1">Б1</a> AI-описания категорий, <a href="#d2">Д2</a> проверка «тестовые данные на витрине»</td>
+</tr>
+<tr>
+<td><a href="#scr-admin-reviews">Отзывы</a></td>
+<td>✅ В колонке Product <strong>GUID вместо названия</strong>, в Author — email или GUID: модератор не понимает, о чём отзыв, не открыв его. ✅ Решение по одному отзыву. ✅ Нет причины скрытия</td>
+<td>Название товара и имя автора вместо ID; массовое одобрение (в API уже есть <code>disable-many</code>, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ReviewController.cs#L248-L258" target="_blank" rel="noopener" class="gh">код</a>)</td>
+<td><a href="#v5">В5</a> AI-метка и предложенное решение для каждого отзыва, сводка тем «на что жалуются»; жалобы на доставку → <a href="#g3">Г3</a></td>
+</tr>
+<tr>
+<td><a href="#scr-admin-orders">Заказы</a></td>
+<td>✅ Нет телефона, отделения НП и <strong>номера ТТН</strong>. ✅ Статус меняется вручную по одному заказу. ✅ Нет печати сборочного листа и выгрузки</td>
+<td>Поля доставки в карточке заказа, массовая смена статуса, кнопка «Печать»</td>
+<td><a href="#a3">А3</a> сборочные листы, <a href="#a4">А4</a> ТТН одним кликом или автоматически, <a href="#a5">А5</a> статус из трекинга НП, <a href="#g1">Г1</a> бот отвечает клиентам сам</td>
+</tr>
+<tr>
+<td><a href="#scr-admin-users">Пользователи</a></td>
+<td>✅ Видно только имя, email, роль, статус. Нет числа заказов, суммы покупок, даты последнего заказа</td>
+<td>Колонки «Orders», «Spent», «Last order»</td>
+<td><a href="#v4">В4</a> сегменты для рассылок, <a href="#v6">В6</a> лиды в CRM</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Главная мысль для собеседования:</strong> автоматизация не заменяет админку, а <strong>меняет роль админа</strong> с «оператора, который вбивает данные» на «контролёра, который одобряет то, что подготовил робот». Как это устроено технически, показано в <a href="#system">разделе 10</a> и на <a href="#final">итоговой схеме</a>.</p>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#growth">→ далее: Развитие сервиса</a></p>
+<hr />
+<h2><a id="growth"></a>6. Развитие сервиса: чего не хватает магазину</h2>
+<p>Что нужно Perry, чтобы стать настоящим магазином в Украине. Список собран по коду и скриншотам. Где-то это доработка Product API (зона Сергея), где-то — других частей.</p>
+<table>
+<thead>
+<tr>
+<th>№</th>
+<th>Чего не хватает</th>
+<th>Как видно, что этого нет</th>
+<th>Что сделать</th>
+<th>Связь с автоматизацией</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>G1</td>
+<td><strong>Доставка «Новой почтой»</strong>: телефон, город и отделение из справочника НП, номер ТТН</td>
+<td>✅ В checkout только страна, область, город, индекс (<a href="#scr-checkout">рис. 7</a>); в <code>Order</code> одна строка адреса (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Domain/Entities/Order.cs#L28-L33" target="_blank" rel="noopener" class="gh">Order.cs</a>)</td>
+<td>Поля в заказе + выбор отделения на checkout</td>
+<td><a href="#a4">А4</a>, <a href="#a5">А5</a>, <a href="#api-5">API-5</a></td>
+</tr>
+<tr>
+<td>G2</td>
+<td><strong>Реальная оплата</strong> (эквайринг)</td>
+<td>✅ «Demo checkout — no real charge» на <a href="#scr-checkout">рис. 7</a>; допустимы только Cash, Card, Online (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/OrderService.cs#L281-L284" target="_blank" rel="noopener" class="gh">код</a>)</td>
+<td>❓ Подключить платёжного провайдера, статус «оплачен» по его вебхуку</td>
+<td>шаг «оплата» на <a href="#final">итоговой схеме</a></td>
+</tr>
+<tr>
+<td>G3</td>
+<td><strong>Гривна и украинский интерфейс</strong></td>
+<td>✅ Цены в $ на всех скринах, интерфейс на английском; переводятся только отзывы (<a href="#scr-reviews">рис. 5</a>)</td>
+<td>Валюта UAH, локализация UA</td>
+<td><a href="#b1">Б1</a> AI-переводы карточек</td>
+</tr>
+<tr>
+<td>G4</td>
+<td><strong>Письмо «снова в наличии»</strong></td>
+<td>✅ Подписка есть, а <code>NotifiedAtUtc</code> никто не заполняет (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Domain/Entities/StockNotifyRequest.cs#L19-L20" target="_blank" rel="noopener" class="gh">код</a>)</td>
+<td>Отправка при пополнении остатка</td>
+<td><a href="#a2">А2</a>, <a href="#api-6">API-6</a></td>
+</tr>
+<tr>
+<td>G5</td>
+<td><strong>Возвраты с возвратом на склад</strong></td>
+<td>✅ Статус <code>Returned</code> есть (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Domain/Enums/OrderStatus.cs#L22" target="_blank" rel="noopener" class="gh">OrderStatus.cs</a>), но смена статуса остаток не трогает (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/OrderService.cs#L373-L385" target="_blank" rel="noopener" class="gh">код</a>)</td>
+<td>Возврат товара на склад и причина возврата</td>
+<td><a href="#a6">А6</a>, <a href="#api-8">API-8</a></td>
+</tr>
+<tr>
+<td>G6</td>
+<td><strong>Промокоды и акции</strong></td>
+<td>✅ В коде нет ни промокодов, ни купонов (поиск по `promo</td>
+<td>coupon` пуст); скидка только через «старую цену» (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Domain/Entities/Product.cs#L40-L44" target="_blank" rel="noopener" class="gh">Product.cs</a>)</td>
+<td>❓ Сущность «промокод»</td>
+</tr>
+<tr>
+<td>G7</td>
+<td><strong>Брошенные корзины</strong></td>
+<td>✅ Есть <code>Cart.UpdatedAtUtc</code>, но никто корзины не перебирает</td>
+<td>Эндпоинт списка «старых» корзин</td>
+<td><a href="#v3">В3</a>, <a href="#api-7">API-7</a></td>
+</tr>
+<tr>
+<td>G8</td>
+<td><strong>Поддержка в мессенджере</strong></td>
+<td>✅ В футере иконка Telegram (<a href="#scr-wishlist">рис. 10</a>), бота нет</td>
+<td>Telegram-бот</td>
+<td><a href="#g1">Г1</a>–<a href="#g3">Г3</a></td>
+</tr>
+<tr>
+<td>G9</td>
+<td><strong>Аналитика и источники трафика</strong></td>
+<td>✅ Есть просмотры, продажи, wishlist (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/ProductStatisticsService.cs" target="_blank" rel="noopener" class="gh">ProductStatisticsService</a>), но нет UTM и воронки</td>
+<td>Сохранять UTM в заказе</td>
+<td><a href="#v6">В6</a>, <a href="#v7">В7</a></td>
+</tr>
+<tr>
+<td>G10</td>
+<td><strong>События для внешних систем</strong> (вебхуки)</td>
+<td>✅ Product API умеет только слать письма по SMTP (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/IEmailSender.cs#L6" target="_blank" rel="noopener" class="gh">IEmailSender.cs</a>)</td>
+<td>Исходящие вебхуки</td>
+<td>вся <a href="#system">система автоматизации</a>, <a href="#api-1">API-1</a></td>
+</tr>
+</tbody>
+</table>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#goals">→ далее: Цель и метрики</a></p>
+<hr />
+<h2><a id="goals"></a>7. Цель и метрики</h2>
+<p><strong>Цель:</strong> снять с людей повторяющуюся работу и <strong>доказать цифрами</strong>, сколько часов и денег это дало, как требует <a href="#vacancy">вакансия</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Метрика</th>
+<th>Как считаем</th>
+<th>Целевое значение ⚠️ примерная оценка</th>
+<th>Откуда берём данные</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Сэкономленные часы в месяц</strong></td>
+<td>(запусков воркфлоу за месяц) × (минут ручной работы на 1 запуск до автоматизации) ÷ 60. Запуски, где человек всё равно доделывал руками, считаем с понижающим коэффициентом</td>
+<td>≥ 250 ч/мес к 8-й неделе, ≈ 362 ч/мес к 12-й (<a href="#effect">раздел 14</a>)</td>
+<td>журнал запусков n8n (<a href="#g-execution">execution log</a>) + замер «до» секундомером</td>
+</tr>
+<tr>
+<td><strong>Деньги</strong></td>
+<td>часы × стоимость часа сотрудника</td>
+<td><strong>пример ставки: 200 грн/ч</strong> ⚠️ (≈ 33 600 грн за 168 ч; это не данные Race Expert, а условное число для расчёта)</td>
+<td>бухгалтерия ❓</td>
+</tr>
+<tr>
+<td><strong>Ошибки</strong></td>
+<td>доля заказов с ошибкой в ТТН, адресе, количестве</td>
+<td>с ≈ 2 % до &lt; 0,3 % ⚠️</td>
+<td>возвраты НП «адресат не найден», жалобы</td>
+</tr>
+<tr>
+<td><strong>Скорость ответа клиенту</strong></td>
+<td>время от вопроса «где мой заказ» до ответа</td>
+<td>с ≈ 2 ч до &lt; 1 мин ⚠️</td>
+<td>логи <a href="#g1">бота</a></td>
+</tr>
+<tr>
+<td><strong>Скорость обработки заказа</strong></td>
+<td>время от «заказ создан» до «ТТН создана»</td>
+<td>с ≈ 4 ч до &lt; 10 мин ⚠️</td>
+<td>события <a href="#api-1">API-1</a></td>
+</tr>
+<tr>
+<td><strong>Использование</strong></td>
+<td>доля процессов, которые реально идут через автоматизацию</td>
+<td>&gt; 80 %</td>
+<td>n8n Insights ✅ (есть в планах n8n, <a href="#tools">раздел 12</a>)</td>
+</tr>
+<tr>
+<td><strong>Стоимость автоматизации</strong></td>
+<td>сервер + AI-вызовы + платные тарифы</td>
+<td>&lt; 3 % от сэкономленных денег ⚠️</td>
+<td><a href="#agents-cost">раздел 11.4</a>, <a href="#tools">раздел 12</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Допущения о магазине</strong> ⚠️ (Perry пока не продаёт по-настоящему, поэтому берём «условный магазин размера Race Expert»: 10–50 сотрудников):</p>
+<table>
+<thead>
+<tr>
+<th>Параметр</th>
+<th>Значение</th>
+<th>Почему так</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Заказов в день</td>
+<td><strong>50</strong> (≈ 1 500 в месяц)</td>
+<td>средний интернет-магазин такого размера; <strong>требует уточнения</strong></td>
+</tr>
+<tr>
+<td>Активных товаров (SKU)</td>
+<td>≈ 1 200</td>
+<td>в демо 194, умножаем «на живой ассортимент»</td>
+</tr>
+<tr>
+<td>Поставщиков</td>
+<td>6</td>
+<td>допущение</td>
+</tr>
+<tr>
+<td>Новых товаров в месяц</td>
+<td>100</td>
+<td>допущение</td>
+</tr>
+<tr>
+<td>Обращений в поддержку</td>
+<td>30 в день (900 в месяц), из них ≈ 60 % «где мой заказ»</td>
+<td>типичная доля для e-commerce, допущение</td>
+</tr>
+<tr>
+<td>Возвратов</td>
+<td>3 % заказов (45 в месяц)</td>
+<td>допущение</td>
+</tr>
+<tr>
+<td>Отзывов</td>
+<td>300 в месяц</td>
+<td>допущение</td>
+</tr>
+</tbody>
+</table>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#map">→ далее: Карта ручных процессов</a></p>
+<hr />
+<h2><a id="map"></a>8. Карта ручных процессов</h2>
+<p>Все цифры — ⚠️ <strong>примерная оценка</strong> при <a href="#goals">допущениях выше</a>. «Доля» — какую часть работы забирает автоматизация. Остальное остаётся человеку (проверка, исключения).</p>
+<table>
+<thead>
+<tr>
+<th>№</th>
+<th>Процесс</th>
+<th>Кто делает</th>
+<th>Раз в месяц</th>
+<th>Мин на раз</th>
+<th>Ручных ч/мес</th>
+<th>Доля</th>
+<th><strong>Экономия ч/мес</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#a1">А1</a></td>
+<td>Сверка остатков и цен с прайсами поставщиков</td>
+<td>закупки</td>
+<td>180 (6 × 30 дней)</td>
+<td>15</td>
+<td>45,0</td>
+<td>85 %</td>
+<td><strong>38</strong></td>
+</tr>
+<tr>
+<td><a href="#a2">А2</a></td>
+<td>Низкие остатки, заявка поставщику, «снова в наличии»</td>
+<td>закупки</td>
+<td>48</td>
+<td>30</td>
+<td>24,0</td>
+<td>70 %</td>
+<td><strong>17</strong></td>
+</tr>
+<tr>
+<td><a href="#a3">А3</a></td>
+<td>Сборочный лист по заказам</td>
+<td>склад</td>
+<td>1 500</td>
+<td>1,5</td>
+<td>37,5</td>
+<td>80 %</td>
+<td><strong>30</strong></td>
+</tr>
+<tr>
+<td><a href="#a4">А4</a></td>
+<td>Накладная (ТТН) «Новой почты»</td>
+<td>склад / оператор</td>
+<td>1 500</td>
+<td>3</td>
+<td>75,0</td>
+<td>85 %</td>
+<td><strong>64</strong></td>
+</tr>
+<tr>
+<td><a href="#a5">А5</a></td>
+<td>Трекинг и уведомления клиенту</td>
+<td>оператор</td>
+<td>1 500</td>
+<td>1</td>
+<td>25,0</td>
+<td>90 %</td>
+<td><strong>22</strong></td>
+</tr>
+<tr>
+<td><a href="#a6">А6</a></td>
+<td>Возвраты</td>
+<td>оператор + склад</td>
+<td>45</td>
+<td>20</td>
+<td>15,0</td>
+<td>50 %</td>
+<td><strong>7,5</strong></td>
+</tr>
+<tr>
+<td><a href="#b1">Б1</a></td>
+<td>Описания и SEO для новых товаров</td>
+<td>контент</td>
+<td>100</td>
+<td>25</td>
+<td>41,7</td>
+<td>70 %</td>
+<td><strong>29</strong></td>
+</tr>
+<tr>
+<td><a href="#b2">Б2</a></td>
+<td>Нормализация характеристик (фильтров)</td>
+<td>контент</td>
+<td>100</td>
+<td>10</td>
+<td>16,7</td>
+<td>75 %</td>
+<td><strong>12,5</strong></td>
+</tr>
+<tr>
+<td><a href="#b3">Б3</a></td>
+<td>Обработка фото</td>
+<td>контент</td>
+<td>500 фото</td>
+<td>3</td>
+<td>25,0</td>
+<td>80 %</td>
+<td><strong>20</strong></td>
+</tr>
+<tr>
+<td><a href="#b4">Б4</a></td>
+<td>Мониторинг цен конкурентов</td>
+<td>категорийный менеджер</td>
+<td>30</td>
+<td>30</td>
+<td>15,0</td>
+<td>80 %</td>
+<td><strong>12</strong></td>
+</tr>
+<tr>
+<td><a href="#v1">В1</a></td>
+<td>Посты и объявления о новинках и скидках</td>
+<td>маркетолог</td>
+<td>30</td>
+<td>40</td>
+<td>20,0</td>
+<td>60 %</td>
+<td><strong>12</strong></td>
+</tr>
+<tr>
+<td><a href="#v2">В2</a></td>
+<td>Публикация по расписанию</td>
+<td>маркетолог</td>
+<td>30</td>
+<td>10</td>
+<td>5,0</td>
+<td>80 %</td>
+<td><strong>4</strong></td>
+</tr>
+<tr>
+<td><a href="#v3">В3</a></td>
+<td>Напоминания о брошенной корзине</td>
+<td>сейчас <strong>никто</strong></td>
+<td>500 корзин</td>
+<td>—</td>
+<td>0</td>
+<td>—</td>
+<td><strong>0</strong> (эффект в продажах)</td>
+</tr>
+<tr>
+<td><a href="#v4">В4</a></td>
+<td>Email- и Telegram-рассылки</td>
+<td>маркетолог</td>
+<td>8</td>
+<td>90</td>
+<td>12,0</td>
+<td>60 %</td>
+<td><strong>7</strong></td>
+</tr>
+<tr>
+<td><a href="#v5">В5</a></td>
+<td>Модерация и анализ отзывов</td>
+<td>контент</td>
+<td>300</td>
+<td>2</td>
+<td>10,0</td>
+<td>70 %</td>
+<td><strong>7</strong></td>
+</tr>
+<tr>
+<td><a href="#v6">В6</a></td>
+<td>Лиды и UTM в CRM</td>
+<td>продажи</td>
+<td>200</td>
+<td>3</td>
+<td>10,0</td>
+<td>90 %</td>
+<td><strong>9</strong></td>
+</tr>
+<tr>
+<td><a href="#v7">В7</a></td>
+<td>Еженедельный отчёт маркетинга</td>
+<td>маркетолог</td>
+<td>4</td>
+<td>180</td>
+<td>12,0</td>
+<td>85 %</td>
+<td><strong>10</strong></td>
+</tr>
+<tr>
+<td><a href="#g1">Г1</a></td>
+<td>Ответы «где мой заказ»</td>
+<td>поддержка</td>
+<td>540</td>
+<td>4</td>
+<td>36,0</td>
+<td>70 %</td>
+<td><strong>25</strong></td>
+</tr>
+<tr>
+<td><a href="#g2">Г2</a></td>
+<td>Ответы на частые вопросы</td>
+<td>поддержка</td>
+<td>360</td>
+<td>3</td>
+<td>18,0</td>
+<td>60 %</td>
+<td><strong>11</strong></td>
+</tr>
+<tr>
+<td><a href="#g3">Г3</a></td>
+<td>Передача сложных вопросов человеку с резюме</td>
+<td>поддержка</td>
+<td>300</td>
+<td>1</td>
+<td>5,0</td>
+<td>80 %</td>
+<td><strong>4</strong></td>
+</tr>
+<tr>
+<td><a href="#d1">Д1</a></td>
+<td>Ежедневная сводка KPI</td>
+<td>руководитель</td>
+<td>30</td>
+<td>30</td>
+<td>15,0</td>
+<td>90 %</td>
+<td><strong>13,5</strong></td>
+</tr>
+<tr>
+<td><a href="#d2">Д2</a></td>
+<td>Поиск аномалий</td>
+<td>руководитель</td>
+<td>30</td>
+<td>20</td>
+<td>10,0</td>
+<td>80 %</td>
+<td><strong>8</strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Итого</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td><strong>≈ 473</strong></td>
+<td></td>
+<td><strong>≈ 362,5</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Ручная работа по потокам (ч/мес, ⚠️ оценка):</p>
+<div class="mermaid-wrap"><pre class="mermaid">pie showData
+  title Ручные часы в месяц по потокам
+  &quot;А. Склад и логистика&quot; : 221.5
+  &quot;Б. Каталог и контент&quot; : 98.4
+  &quot;В. Маркетинг&quot; : 69
+  &quot;Г. Поддержка&quot; : 59
+  &quot;Д. Отчётность&quot; : 25
+</pre></div>
+<p><strong>Вывод:</strong> почти половина ручной работы — склад и логистика, и она растёт <strong>вместе с числом заказов</strong>. Поэтому <a href="#stream-a">поток А</a> идёт первым, а <a href="#stream-d">поток Д</a> берём как самую быструю победу: данные уже отдаёт <code>GET /api/orders/admin</code>.</p>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#stream-a">→ далее: Поток А. Склад и логистика</a></p>
+<hr />
+<h2><a id="stream-a"></a>9А. Поток А. Склад и логистика</h2>
+<h3><a id="a-goal"></a>Цель</h3>
+<p>Чтобы заказ сам доходил от «оформлен» до «ТТН создана, клиент получил номер», а остатки на сайте совпадали со складом и поставщиками. Человек на складе собирает коробки, а не переписывает адреса.</p>
+<h3><a id="a-now"></a>Как сейчас → как будет</h3>
+<table>
+<thead>
+<tr>
+<th>Сейчас (⚠️ типичный ручной процесс, в Perry ещё не реализован)</th>
+<th>Будет</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Менеджер утром открывает прайсы 6 поставщиков (Excel, email) и правит остатки в <a href="#scr-admin-create">форме товара</a> по одному</td>
+<td>n8n раз в час читает прайсы, сверяет по SKU и обновляет остатки одним запросом (<a href="#a1">А1</a>)</td>
+</tr>
+<tr>
+<td>Товар закончился — узнают, когда клиент пожалуется</td>
+<td>Алерт «осталось &lt; 5 шт.» в Telegram и готовый черновик заказа поставщику (<a href="#a2">А2</a>)</td>
+</tr>
+<tr>
+<td>Кладовщик переписывает состав заказов на бумагу</td>
+<td>Сборочный лист в Google Sheets и PDF появляется сам при новом заказе (<a href="#a3">А3</a>)</td>
+</tr>
+<tr>
+<td>Оператор копирует адрес в кабинет «Новой почты» и создаёт ТТН руками, ≈ 3 мин на заказ</td>
+<td>ТТН создаётся через API НП, номер сохраняется в заказ (<a href="#a4">А4</a>)</td>
+</tr>
+<tr>
+<td>Клиент пишет «где посылка?»</td>
+<td>Статус НП подтягивается каждые 2 часа, клиент получает уведомление сам (<a href="#a5">А5</a>)</td>
+</tr>
+<tr>
+<td>Возврат оформляют по переписке</td>
+<td>Форма возврата → проверка → ТТН возврата → остаток обратно на склад (<a href="#a6">А6</a>)</td>
+</tr>
+</tbody>
+</table>
+<h3><a id="a-scheme"></a>Схема</h3>
+<div class="mermaid-wrap"><pre class="mermaid">flowchart TB
+  subgraph SUP[&quot;Поставщики&quot;]
+    P1[&quot;Прайсы XLSX / CSV / email&quot;]
+  end
+  subgraph N8N[&quot;n8n: поток А&quot;]
+    A1[&quot;А1 Schedule Trigger 1 ч&lt;br/&gt;сверка остатков и цен&quot;]
+    A2[&quot;А2 IF остаток меньше порога&lt;br/&gt;алерт + черновик закупки&quot;]
+    A3[&quot;А3 Webhook order.created&lt;br/&gt;сборочный лист&quot;]
+    A4[&quot;А4 HTTP Request НП&lt;br/&gt;InternetDocument.save&quot;]
+    A5[&quot;А5 Schedule Trigger 2 ч&lt;br/&gt;TrackingDocument.getStatusDocuments&quot;]
+    A6[&quot;А6 Webhook возврат&lt;br/&gt;ТТН возврата + restock&quot;]
+  end
+  API[&quot;Product API Perry&quot;]
+  NP[&quot;API Новой почты&quot;]
+  TG[&quot;Telegram: склад, закупки, клиент&quot;]
+  GS[&quot;Google Sheets: листы и журнал&quot;]
+  P1 --&gt; A1 --&gt;|&quot;PATCH stock, API-3&quot;| API
+  API --&gt;|&quot;остатки&quot;| A2 --&gt; TG
+  API --&gt;|&quot;order.created, API-1&quot;| A3 --&gt; GS
+  A3 --&gt; A4 --&gt; NP
+  A4 --&gt;|&quot;ТТН в заказ, API-5&quot;| API
+  A5 --&gt; NP
+  A5 --&gt;|&quot;статус Shipped&quot;| API
+  A5 --&gt; TG
+  A6 --&gt; NP
+  A6 --&gt;|&quot;restock, API-8&quot;| API
+  HUMAN([&quot;Человек одобряет&lt;br/&gt;закупку и возврат&quot;]) -.-&gt; A2
+  HUMAN -.-&gt; A6
+</pre></div>
+<h3><a id="a-steps"></a>Шаги автоматизации</h3>
+<h4><a id="a1"></a>А1. Синхронизация остатков и цен с поставщиками</h4>
+<p>Экраны: <a href="#scr-admin-products">товары</a>, <a href="#scr-admin-create">создание товара</a> · модуль: <a href="#mod-api">Product API</a> · нужно: <a href="#api-3">API-3</a>, <a href="#api-4">API-4</a></p>
+<ol>
+<li><strong>Schedule Trigger</strong> — раз в час (или <strong>Gmail Trigger</strong> на письмо с прайсом).</li>
+<li><strong>HTTP Request</strong> / <strong>Read Binary File</strong> / <strong>Gmail</strong> — забрать файл прайса поставщика.</li>
+<li><strong>Extract from File</strong> — XLSX или CSV в строки.</li>
+<li><strong>Code</strong> — привести к общему виду <code>{sku, qty, purchasePrice}</code>; разные поставщики называют колонки по-разному, правила лежат в <strong>Data table</strong> n8n.</li>
+<li><strong>HTTP Request</strong> → <code>GET /api/admin/stock?skus=…</code> (<a href="#api-3">API-3</a>) — текущие остатки Perry.</li>
+<li><strong>Compare Datasets</strong> — найти расхождения по SKU.</li>
+<li><strong>IF</strong> — расхождение больше 30 % или цена изменилась больше чем на 10 %? → в <strong>Telegram «Send and Wait for Response»</strong> на одобрение человеку (<a href="#g-hitl">HITL</a>). Мелкие расхождения проходят сами.</li>
+<li><strong>HTTP Request</strong> → <code>PATCH /api/admin/stock/bulk</code> (<a href="#api-3">API-3</a>) с ключом идемпотентности (<a href="#api-9">API-9</a>).</li>
+<li><strong>Google Sheets</strong> — строка в журнал: сколько SKU обновлено, кем, когда.</li>
+</ol>
+<p>Важно ✅: сейчас обновить остаток можно только через <code>PUT /api/products/{id}</code>, который <strong>перезаписывает фото, характеристики и about целиком</strong> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L617-L627" target="_blank" rel="noopener" class="gh">ProductsController.cs</a>). А <code>GET /api/products/update/{id}</code> отдаёт характеристики <strong>без флага <code>IsFilterable</code></strong> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L221-L223" target="_blank" rel="noopener" class="gh">строки 221–223</a>), и при обратной отправке флаг станет <code>false</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L685" target="_blank" rel="noopener" class="gh">строка 685</a>, по умолчанию <code>IsFilterable = false</code>, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L528" target="_blank" rel="noopener" class="gh">строка 528</a>). Фильтры каталога (<a href="#scr-catalog">рис. 2</a>) после такой синхронизации <strong>сломаются</strong>. Поэтому для А1 обязателен отдельный эндпоинт остатков (<a href="#api-3">API-3</a>).</p>
+<h4><a id="a2"></a>А2. Низкие остатки, черновик закупки и «снова в наличии»</h4>
+<p>Экраны: <a href="#scr-home">главная, карточка Notify</a>, <a href="#scr-admin-products">товары</a> · нужно: <a href="#api-3">API-3</a>, <a href="#api-6">API-6</a></p>
+<ol>
+<li><strong>Schedule Trigger</strong> — каждое утро в 08:00 (или вебхук <code>product.stock_low</code>, <a href="#api-1">API-1</a>).</li>
+<li><strong>HTTP Request</strong> → остатки (<a href="#api-3">API-3</a>) и продажи за 14 дней (<code>GET /api/orders/admin?fromUtc=…</code>, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/OrdersController.cs#L82-L98" target="_blank" rel="noopener" class="gh">код</a>).</li>
+<li><strong>Code</strong> — «дней до нуля» = остаток ÷ средние продажи в день; порог 7 дней ⚠️.</li>
+<li><strong>OpenAI</strong> (или <strong>AI Agent</strong>) — собрать черновик письма поставщику: таблица SKU и количество, вежливый текст на украинском.</li>
+<li><strong>Telegram «Send and Wait for Response»</strong> — менеджер закупок жмёт «Отправить» или «Исправить».</li>
+<li><strong>Gmail</strong> — письмо поставщику после одобрения.</li>
+<li>Ветка «снова в наличии»: вебхук <code>product.back_in_stock</code> → <strong>HTTP Request</strong> <code>GET /api/admin/stock-notify/pending?productId=…</code> (<a href="#api-6">API-6</a>) → <strong>Send Email</strong> каждому подписчику → <code>PATCH …/notified</code>. Сегодня подписка сохраняется (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/StockNotifyController.cs#L56-L70" target="_blank" rel="noopener" class="gh">StockNotifyController.cs</a>), а письма о поступлении нет совсем (<a href="#growth">G4</a>).</li>
+</ol>
+<h4><a id="a3"></a>А3. Сборочный лист по заказу</h4>
+<p>Экраны: <a href="#scr-admin-orders">заказы</a>, <a href="#scr-order-modal">детали заказа</a> · нужно: <a href="#api-1">API-1</a></p>
+<ol>
+<li><strong>Webhook</strong> — событие <code>order.created</code> от Perry (<a href="#api-1">API-1</a>). До появления вебхука — <strong>Schedule Trigger</strong> каждые 10 минут + <strong>HTTP Request</strong> <code>GET /api/orders/admin?status=Ordered&amp;fromUtc=…</code> (работает <strong>уже сейчас</strong>, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/OrdersController.cs#L82-L126" target="_blank" rel="noopener" class="gh">код</a>).</li>
+<li><strong>Split Out</strong> — позиции заказа (в ответе есть <code>items</code> с названием, количеством, ценой, картинкой, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/OrdersController.cs#L226-L235" target="_blank" rel="noopener" class="gh">код</a>).</li>
+<li><strong>Code</strong> — сгруппировать по ячейкам склада ❓ (в Perry нет адреса ячейки, <a href="#q7">вопрос 7</a>).</li>
+<li><strong>Google Sheets</strong> — строка в лист «Сборка на сегодня»; <strong>HTML</strong> + <strong>Convert to File</strong> — PDF для печати.</li>
+<li><strong>Telegram</strong> — складу: «Новый заказ #AT456BB, 3 позиции, лист готов».</li>
+<li><strong>HTTP Request</strong> → <code>PUT /api/orders/{id}/status</code> = <code>Received</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/OrdersController.cs#L162-L171" target="_blank" rel="noopener" class="gh">код</a>). Клиент сразу получает письмо, его уже шлёт Perry (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/OrderService.cs#L387-L403" target="_blank" rel="noopener" class="gh">OrderService.cs</a>).</li>
+</ol>
+<h4><a id="a4"></a>А4. Накладная (ТТН) «Новой почты»</h4>
+<p>Экраны: <a href="#scr-checkout">checkout</a>, <a href="#scr-order-modal">детали заказа</a>, <a href="#scr-admin-orders">заказы</a> · нужно: <a href="#api-5">API-5</a>, <a href="#growth">G1</a></p>
+<p>API «Новой почты» ✅ (<a href="https://api-portal.novapost.com/methods/ua/api-docs-ua/eng" target="_blank" rel="noopener">документация</a>): один адрес <code>https://api.novaposhta.ua/v2.0/json/</code>, метод POST, в теле JSON <code>apiKey</code>, <code>modelName</code>, <code>calledMethod</code>, <code>methodProperties</code>. Ключ бесплатный, создаётся в бизнес-кабинете: «Настройки → Безопасность» (<a href="https://novaposhta.ua/en/for-business/cooperation/integration/" target="_blank" rel="noopener">novaposhta.ua</a>).</p>
+<ol>
+<li><strong>Webhook</strong> <code>order.created</code> (или кнопка «Создать ТТН» в админке → <strong>Webhook</strong>).</li>
+<li><strong>HTTP Request</strong> → <code>GET /api/orders/{id}</code> + контакты получателя (<a href="#api-5">API-5</a>).</li>
+<li><strong>IF</strong> — есть телефон и <code>warehouseRef</code>? Нет → <strong>Telegram</strong> оператору «заполните доставку» (ручная ветка).</li>
+<li><strong>HTTP Request</strong> → НП: справочник городов и отделений (модель <code>Address</code>, методы поиска населённых пунктов и отделений ❓ сверить точные имена методов с документацией) — только если в заказе пришёл текст, а не <code>Ref</code>.</li>
+<li><strong>HTTP Request</strong> → НП: получатель (модель <code>Counterparty</code>) ❓ уточнить порядок вызовов.</li>
+<li><strong>Code</strong> — вес и объём из товаров ❓ (в <code>Product</code> нет веса, <a href="#q8">вопрос 8</a>); по умолчанию 1 кг ⚠️.</li>
+<li><strong>HTTP Request</strong> → НП <code>InternetDocument</code> / <code>save</code> ✅ — создать ТТН; в ответе номер <code>IntDocNumber</code> и <code>Ref</code>.</li>
+<li><strong>HTTP Request</strong> → <code>PUT /api/orders/{id}/shipment</code> (<a href="#api-5">API-5</a>) — сохранить номер ТТН; статус <code>Shipped</code>.</li>
+<li><strong>Telegram</strong> / <strong>Send Email</strong> — клиенту номер ТТН и ссылку на трекинг.</li>
+<li><strong>Error Trigger</strong> — любая ошибка НП → в чат операторов, заказ помечается «нужен человек».</li>
+</ol>
+<div class="mermaid-wrap"><pre class="mermaid">sequenceDiagram
+  autonumber
+  participant P as Product API
+  participant N as n8n
+  participant NP as API Новой почты
+  participant O as Оператор (Telegram)
+  participant C as Клиент
+  P-&gt;&gt;N: Webhook order.created (orderId, orderNumber)
+  N-&gt;&gt;P: GET /api/orders/id + доставка (API-5)
+  alt нет телефона или отделения
+    N-&gt;&gt;O: Заполните доставку для #AT456BB
+    O--&gt;&gt;N: данные исправлены
+  end
+  N-&gt;&gt;NP: InternetDocument.save
+  NP--&gt;&gt;N: IntDocNumber, Ref
+  N-&gt;&gt;P: PUT /api/orders/id/shipment (ТТН, Shipped)
+  P--&gt;&gt;C: письмо о смене статуса (уже есть в коде)
+  N-&gt;&gt;C: Telegram или email с номером ТТН
+</pre></div>
+<h4><a id="a5"></a>А5. Трекинг и уведомления клиенту</h4>
+<p>Экраны: <a href="#scr-my-orders">Мои заказы</a>, <a href="#scr-admin-orders">заказы в админке</a> · связано: <a href="#g1">Г1</a></p>
+<ol>
+<li><strong>Schedule Trigger</strong> — каждые 2 часа с 8:00 до 22:00.</li>
+<li><strong>HTTP Request</strong> → Perry: заказы в статусе <code>Shipped</code> с ТТН (<a href="#api-5">API-5</a>).</li>
+<li><strong>Code</strong> — пачки по 100 номеров ⚠️ (ограничение на запрос сверить с документацией ❓).</li>
+<li><strong>HTTP Request</strong> → НП <code>TrackingDocument</code> / <code>getStatusDocuments</code> ✅ (<code>Documents: [{DocumentNumber, Phone}]</code>); в ответе <code>Status</code>, <code>StatusCode</code>, дата доставки.</li>
+<li><strong>Switch</strong> по <code>StatusCode</code>: «прибыл в отделение» → <code>ReadyToPickup</code>; «получено» → <code>Received</code> ❓ (в Perry статус <code>Received</code> назван «бывший Paid», <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Domain/Enums/OrderStatus.cs#L9-L18" target="_blank" rel="noopener" class="gh">OrderStatus.cs</a>; нужна договорённость, что значит каждый статус, <a href="#q6">вопрос 6</a>).</li>
+<li><strong>HTTP Request</strong> → <code>PUT /api/orders/{id}/status</code> — Perry сам шлёт письмо.</li>
+<li><strong>Telegram</strong> — клиенту, если он подключил бота (<a href="#g1">Г1</a>).</li>
+<li>Через 3 дня после «получено» → запрос отзыва (<a href="#final-steps">шаг 8 итоговой схемы</a>).</li>
+</ol>
+<h4><a id="a6"></a>А6. Возвраты</h4>
+<p>Экраны: <a href="#scr-order-modal">детали заказа</a> · нужно: <a href="#api-8">API-8</a>, <a href="#growth">G5</a></p>
+<ol>
+<li><strong>Form Trigger</strong> (форма n8n) или <strong>Telegram Trigger</strong> — клиент: номер заказа, причина, фото.</li>
+<li><strong>HTTP Request</strong> → <code>GET /api/orders/admin?orderId=…</code> — заказ существует и получен не больше 14 дней назад ⚠️.</li>
+<li><strong>OpenAI</strong> — классифицировать причину (брак, не подошёл размер, не то прислали) и тон.</li>
+<li><strong>Telegram «Send and Wait for Response»</strong> — оператор одобряет возврат (<strong>обязательно человек</strong>: это деньги).</li>
+<li><strong>HTTP Request</strong> → НП — ТТН возврата (модель <code>InternetDocument</code>, ❓ параметры возврата уточнить).</li>
+<li><strong>HTTP Request</strong> → <code>PUT /api/orders/{id}/status</code> = <code>Returned</code> и <code>POST /api/admin/orders/{id}/restock</code> (<a href="#api-8">API-8</a>).</li>
+<li><strong>Google Sheets</strong> — журнал возвратов по причинам → в <a href="#d1">Д1</a> и <a href="#v5">В5</a>.</li>
+</ol>
+<h3><a id="a-api"></a>Связь с API Perry</h3>
+<table>
+<thead>
+<tr>
+<th>Что нужно</th>
+<th>Есть сейчас ✅</th>
+<th>Нужно добавить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Новые заказы</td>
+<td><code>GET /api/orders/admin?status=Ordered</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/OrdersController.cs#L82-L98" target="_blank" rel="noopener" class="gh">код</a>)</td>
+<td>вебхук <code>order.created</code> (<a href="#api-1">API-1</a>)</td>
+</tr>
+<tr>
+<td>Смена статуса</td>
+<td><code>PUT /api/orders/{id}/status</code>, письмо клиенту (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/OrdersController.cs#L162-L171" target="_blank" rel="noopener" class="gh">код</a>)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Остатки</td>
+<td>только по одному товару: <code>GET /api/products/update/{id}</code></td>
+<td><code>GET /api/admin/stock</code>, <code>PATCH …/stock/bulk</code> (<a href="#api-3">API-3</a>)</td>
+</tr>
+<tr>
+<td>Доставка</td>
+<td>одна строка адреса (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Domain/Entities/Order.cs#L28-L33" target="_blank" rel="noopener" class="gh">Order.cs</a>)</td>
+<td>телефон, <code>cityRef</code>, <code>warehouseRef</code>, ТТН (<a href="#api-5">API-5</a>)</td>
+</tr>
+<tr>
+<td>Возврат на склад</td>
+<td>статус <code>Returned</code> без возврата остатка</td>
+<td>restock (<a href="#api-8">API-8</a>)</td>
+</tr>
+<tr>
+<td>Подписчики Notify</td>
+<td>таблица <code>StockNotifyRequests</code></td>
+<td>выдача и отметка (<a href="#api-6">API-6</a>)</td>
+</tr>
+</tbody>
+</table>
+<h3><a id="a-effect"></a>Эффект ⚠️ примерная оценка</h3>
+<p><strong>≈ 178,5 ч/мес</strong> из 221,5 ручных → при ставке 200 грн/ч <strong>≈ 35 700 грн/мес</strong>. Плюс меньше ошибок в ТТН и меньше вопросов «где посылка» (часть эффекта посчитана в <a href="#g1">Г1</a>, не дублируем).</p>
+<h3><a id="a-tech"></a>Технические требования</h3>
+<p>API-ключ НП (бизнес-кабинет), <code>Ref</code> отправителя и его отделения; доступ к почте или папке с прайсами; сервисный токен Perry (<a href="#api-2">API-2</a>); Telegram-бот для склада; Google-аккаунт для Sheets. Всё хранится в Credentials n8n, не в воркфлоу (<a href="#tech">раздел 16</a>).</p>
+<h3><a id="a-complexity"></a>Сложность</h3>
+<p>А3 и А5 — <strong>низкая</strong> (1–2 дня каждый ⚠️). А4 — <strong>средняя</strong> (3–5 дней: справочники и контрагенты НП). А1 — <strong>средняя</strong> (по 0,5–1 дню на формат каждого поставщика). А2, А6 — <strong>средняя</strong>. Код Perry: <a href="#api-gaps">API-1, 3, 5, 6, 8</a> ≈ 5–8 дней ⚠️.</p>
+<h3><a id="a-risks"></a>Риски</h3>
+<p>Ошибка в прайсе поставщика обнулит остатки → порог «большого расхождения» и одобрение (<a href="#r2">R2</a>). Неверное отделение → посылка уедет не туда → проверка <code>warehouseRef</code> по справочнику НП. Изменения API НП → <strong>Error Trigger</strong> и алерт (<a href="#r4">R4</a>).</p>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#stream-b">→ далее: Поток Б. Каталог и контент</a></p>
+<hr />
+<h2><a id="stream-b"></a>9Б. Поток Б. Каталог и контент</h2>
+<h3><a id="b-goal"></a>Цель</h3>
+<p>Новый товар появляется на витрине за минуты, а не за полчаса: с нормальным описанием, правильными характеристиками для фильтров и одинаковыми фото. Цены не отстают от конкурентов.</p>
+<h3><a id="b-now"></a>Как сейчас → как будет</h3>
+<table>
+<thead>
+<tr>
+<th>Сейчас</th>
+<th>Будет</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Контент-менеджер заполняет <a href="#scr-admin-create">форму товара</a> с нуля, ≈ 25 мин ⚠️</td>
+<td>AI-агент готовит черновик из прайса и сайта производителя, человек правит ≈ 7 мин (<a href="#b1">Б1</a>)</td>
+</tr>
+<tr>
+<td>Характеристики вбиваются как попало: на <a href="#scr-specs">рис. 4</a> у кроссовок четыре «Fabric type» ✅</td>
+<td>AI приводит имена и значения к справочнику, фильтры <a href="#scr-catalog">каталога</a> чистые (<a href="#b2">Б2</a>)</td>
+</tr>
+<tr>
+<td>Фото разного размера и фона</td>
+<td>Автообрезка, белый фон, сжатие, alt-текст (<a href="#b3">Б3</a>)</td>
+</tr>
+<tr>
+<td>Цены конкурентов смотрят глазами раз в неделю</td>
+<td>Ежедневная сводка «где мы дороже» (<a href="#b4">Б4</a>)</td>
+</tr>
+</tbody>
+</table>
+<h3><a id="b-scheme"></a>Схема</h3>
+<div class="mermaid-wrap"><pre class="mermaid">flowchart LR
+  SRC[&quot;Прайс поставщика&lt;br/&gt;или ссылка на товар&quot;] --&gt; T[&quot;Webhook или Form Trigger&quot;]
+  T --&gt; AG[&quot;AI Agent: контент&lt;br/&gt;описание, SEO, категория&quot;]
+  AG --&gt; NORM[&quot;Code + OpenAI&lt;br/&gt;нормализация характеристик Б2&quot;]
+  NORM --&gt; IMG[&quot;HTTP Request + Edit Image&lt;br/&gt;фото Б3&quot;]
+  IMG --&gt; HITL{&quot;Telegram&lt;br/&gt;Send and Wait&lt;br/&gt;одобрить черновик?&quot;}
+  HITL --&gt;|&quot;да&quot;| API[&quot;Product API&lt;br/&gt;POST или PUT /api/products&quot;]
+  HITL --&gt;|&quot;исправить&quot;| AG
+  API --&gt; SITE[&quot;Витрина и мобильное&quot;]
+  CMP[&quot;Schedule Trigger&lt;br/&gt;цены конкурентов Б4&quot;] --&gt; REP[&quot;Google Sheets + Telegram&lt;br/&gt;где мы дороже&quot;]
+  REP -.-&gt;|&quot;человек решает&quot;| API
+</pre></div>
+<h3><a id="b-steps"></a>Шаги автоматизации</h3>
+<h4><a id="b1"></a>Б1. AI-описание и SEO</h4>
+<p>Экраны: <a href="#scr-product">карточка товара</a>, <a href="#scr-admin-create">создание товара</a>, <a href="#scr-admin-categories">категории</a> · портфолио: <a href="#pf-3">ПФ-3</a></p>
+<ol>
+<li><strong>Webhook</strong> — <code>product.created</code> со статусом Draft (<a href="#api-1">API-1</a>) или <strong>Form Trigger</strong> «добавить товар по ссылке».</li>
+<li><strong>HTTP Request</strong> → <code>GET /api/products/update/{id}</code> — название, бренд, категория, характеристики (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L187-L211" target="_blank" rel="noopener" class="gh">код</a>).</li>
+<li><strong>AI Agent</strong> (модель OpenAI или другая) с системным <a href="#g-prompt">промптом</a>: «описание 600–900 знаков на украинском, 3–5 пунктов About product, SEO title ≤ 60 знаков, meta description ≤ 160, без выдуманных характеристик». Инструмент агента: <strong>HTTP Request</strong> к сайту производителя ❓.</li>
+<li><strong>Code</strong> — проверка: нет ли в тексте цифр и материалов, которых нет в характеристиках (защита от <a href="#g-hallucination">галлюцинаций</a>).</li>
+<li><strong>Telegram «Send and Wait for Response»</strong> — контент-менеджер видит черновик и жмёт «Одобрить / Переписать».</li>
+<li><strong>HTTP Request</strong> → <code>PATCH /api/products/{id}/content</code> (<a href="#api-4">API-4</a>), а не полный <code>PUT</code>, чтобы не потерять фото и фильтры (<a href="#a1">см. А1</a>).</li>
+</ol>
+<h4><a id="b2"></a>Б2. Нормализация характеристик и фильтров</h4>
+<p>Экраны: <a href="#scr-catalog">каталог</a>, <a href="#scr-specs">характеристики</a></p>
+<ol>
+<li><strong>Webhook</strong> <code>product.created</code> / <code>product.updated</code> или ночной <strong>Schedule Trigger</strong> по всему каталогу.</li>
+<li><strong>HTTP Request</strong> → товар с характеристиками.</li>
+<li><strong>Data table</strong> n8n — справочник: разрешённые имена («Color», «Size», «Fabric type» — именно их ищет API, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L147-L149" target="_blank" rel="noopener" class="gh">код</a>) и значения для каждой категории.</li>
+<li><strong>Code</strong> — точные совпадения и синонимы («cotton», «Cotton », «хлопок» → «Cotton»).</li>
+<li><strong>OpenAI</strong> — только для неизвестных значений: предложить вариант из справочника или «неприменимо» (ткань у обуви).</li>
+<li><strong>IF</strong> — уверенность модели &lt; 0,8 → человеку; иначе → <code>PATCH /api/products/{id}/attributes</code> (<a href="#api-4">API-4</a>) с правильным <code>IsFilterable</code>.</li>
+</ol>
+<h4><a id="b3"></a>Б3. Обработка фото</h4>
+<p>Экраны: <a href="#scr-product">карточка</a>, <a href="#scr-admin-create">создание товара</a></p>
+<ol>
+<li><strong>Webhook</strong> — новое фото у товара.</li>
+<li><strong>HTTP Request</strong> — скачать.</li>
+<li><strong>Edit Image</strong> (n8n) — обрезка до квадрата, размер 1200 px, сжатие; удаление фона — <strong>HTTP Request</strong> во внешний сервис ❓ (платный, выбрать).</li>
+<li><strong>OpenAI</strong> (vision) — alt-текст для доступности и SEO.</li>
+<li><strong>HTTP Request</strong> → загрузить обратно (<a href="#api-4">API-4</a>); Perry уже хранит файлы на диске в <code>/uploads</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Program.cs#L163-L172" target="_blank" rel="noopener" class="gh">Program.cs</a>).</li>
+</ol>
+<h4><a id="b4"></a>Б4. Мониторинг цен конкурентов</h4>
+<p>Экраны: <a href="#scr-catalog">каталог</a>, <a href="#scr-admin-products">товары</a></p>
+<ol>
+<li><strong>Schedule Trigger</strong> — раз в день в 06:00.</li>
+<li><strong>Google Sheets</strong> — список «наш SKU → ссылки конкурентов» (ведёт человек).</li>
+<li><strong>HTTP Request</strong> + <strong>HTML</strong> (Extract HTML Content) — цена со страницы ❓ (проверить правила сайтов; где можно, брать официальные фиды).</li>
+<li><strong>Code</strong> — разница с нашей ценой из <code>GET /api/products</code> (в ответе есть <code>Price</code> и <code>OldPrice</code>, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L115-L124" target="_blank" rel="noopener" class="gh">код</a>).</li>
+<li><strong>Telegram</strong> — сводка «мы дороже на &gt; 5 % по 12 SKU». <strong>Цены сам робот не меняет</strong>: решение за человеком (<a href="#r2">R2</a>).</li>
+</ol>
+<h3><a id="b-api"></a>Связь с API Perry</h3>
+<p>Есть: <code>GET /api/products</code>, <code>GET /api/products/update/{id}</code>, <code>POST</code> / <code>PUT /api/products</code> для ролей Admin и Seller (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L545-L547" target="_blank" rel="noopener" class="gh">код</a>). Нужно: точечные <code>PATCH</code> для контента, характеристик и фото (<a href="#api-4">API-4</a>), вебхук <code>product.created</code> (<a href="#api-1">API-1</a>).</p>
+<h3><a id="b-effect"></a>Эффект ⚠️ примерная оценка</h3>
+<p><strong>≈ 73,5 ч/мес</strong> → <strong>≈ 14 700 грн/мес</strong>. Плюс фильтры каталога начинают работать правильно, а это конверсия, которую в часах не посчитать.</p>
+<h3><a id="b-tech"></a>Технические требования</h3>
+<p>Ключ AI-провайдера; справочник характеристик по категориям (составляет человек один раз, ≈ 1 день ⚠️); сервис удаления фона ❓.</p>
+<h3><a id="b-complexity"></a>Сложность</h3>
+<p>Б1 — <strong>низкая–средняя</strong>, Б2 — <strong>средняя</strong> (справочник), Б3 — <strong>средняя</strong>, Б4 — <strong>средняя</strong> (каждый сайт конкурента свой).</p>
+<h3><a id="b-risks"></a>Риски</h3>
+<p>AI придумывает характеристики → проверка в шаге Б1.4 и одобрение (<a href="#r1">R1</a>). Парсинг конкурентов может нарушать их правила → только разрешённые источники (<a href="#r6">R6</a>).</p>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#stream-v">→ далее: Поток В. Маркетинг</a></p>
+<hr />
+<h2><a id="stream-v"></a>9В. Поток В. Маркетинг</h2>
+<h3><a id="v-goal"></a>Цель</h3>
+<p>Каждая новинка и скидка сама превращается в пост, рассылку и объявление; брошенные корзины и избранное возвращают покупателей; маркетолог раз в неделю получает готовый отчёт, а не собирает его полдня.</p>
+<h3><a id="v-now"></a>Как сейчас → как будет</h3>
+<table>
+<thead>
+<tr>
+<th>Сейчас</th>
+<th>Будет</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Маркетолог вручную пишет пост про каждую акцию</td>
+<td>AI-агент делает 3 варианта поста и объявления, человек выбирает (<a href="#v1">В1</a>)</td>
+</tr>
+<tr>
+<td>Публикация руками в нужное время</td>
+<td>Очередь в Google Sheets, публикация по расписанию (<a href="#v2">В2</a>)</td>
+</tr>
+<tr>
+<td>Брошенные корзины никто не трогает ✅ (в коде нет такого процесса)</td>
+<td>Напоминание через 2 и 24 часа (<a href="#v3">В3</a>)</td>
+</tr>
+<tr>
+<td>Рассылки собираются вручную</td>
+<td>Сегменты из данных Perry, текст от AI, одобрение (<a href="#v4">В4</a>)</td>
+</tr>
+<tr>
+<td>Отзывы читают по одному в <a href="#scr-admin-reviews">модерации</a></td>
+<td>AI-метки и сводка тем (<a href="#v5">В5</a>)</td>
+</tr>
+<tr>
+<td>Заявки и источники трафика теряются</td>
+<td>UTM и лиды в CRM (<a href="#v6">В6</a>)</td>
+</tr>
+<tr>
+<td>Отчёт собирается полдня</td>
+<td>Готовый отчёт в понедельник в 9:00 (<a href="#v7">В7</a>)</td>
+</tr>
+</tbody>
+</table>
+<h3><a id="v-scheme"></a>Схема</h3>
+<div class="mermaid-wrap"><pre class="mermaid">flowchart TB
+  EV[&quot;События Perry&lt;br/&gt;новый товар, скидка, отзыв,&lt;br/&gt;брошенная корзина&quot;] --&gt; ROUTE{&quot;Switch&lt;br/&gt;тип события&quot;}
+  ROUTE --&gt;|&quot;товар или скидка&quot;| V1[&quot;В1 AI Agent: маркетинг&lt;br/&gt;3 варианта поста&quot;]
+  V1 --&gt; APR{&quot;Telegram&lt;br/&gt;одобрить?&quot;}
+  APR --&gt;|&quot;да&quot;| V2[&quot;В2 Google Sheets очередь&lt;br/&gt;Schedule Trigger публикует&quot;]
+  V2 --&gt; SOC[&quot;Telegram-канал, Instagram,&lt;br/&gt;Facebook через их API&quot;]
+  ROUTE --&gt;|&quot;корзина старше 2 ч&quot;| V3[&quot;В3 напоминание&lt;br/&gt;email или Telegram&quot;]
+  ROUTE --&gt;|&quot;отзыв&quot;| V5[&quot;В5 AI-модерация&lt;br/&gt;метка + решение&quot;]
+  V5 --&gt; MOD([&quot;Модератор:&lt;br/&gt;Approve или Delete&quot;])
+  SEG[&quot;В4 сегменты из Perry&lt;br/&gt;и Admin Service&quot;] --&gt; V4[&quot;рассылка&lt;br/&gt;после одобрения&quot;]
+  LEAD[&quot;Form Trigger + UTM&quot;] --&gt; V6[&quot;В6 CRM&quot;]
+  ALL[&quot;заказы, отзывы, wishlist, рассылки&quot;] --&gt; V7[&quot;В7 отчёт по понедельникам&quot;]
+</pre></div>
+<h3><a id="v-steps"></a>Шаги автоматизации</h3>
+<h4><a id="v1"></a>В1. AI-посты и объявления о новинках и скидках</h4>
+<p>Экраны: <a href="#scr-home">главная, Trending deals</a>, <a href="#scr-product">карточка</a></p>
+<ol>
+<li><strong>Webhook</strong> <code>product.created</code> или <code>product.price_dropped</code> (<a href="#api-1">API-1</a>); резерв — <strong>Schedule Trigger</strong> + <code>GET /api/products?sort=newest</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L104-L107" target="_blank" rel="noopener" class="gh">код</a>).</li>
+<li><strong>IF</strong> — у товара есть скидка (<code>OldPrice</code> &gt; <code>Price</code>, бейдж «−20 %» на <a href="#scr-home">рис. 1</a>) или он новый.</li>
+<li><strong>AI Agent</strong> — 3 варианта: пост для Telegram-канала, подпись для Instagram, текст объявления (заголовок ≤ 30 знаков, описание ≤ 90) ⚠️ по типичным лимитам рекламных систем, ❓ сверить.</li>
+<li><strong>Telegram «Send and Wait for Response»</strong> — маркетолог выбирает вариант или правит.</li>
+<li><strong>Google Sheets</strong> — в очередь публикаций с датой и UTM-меткой.</li>
+</ol>
+<h4><a id="v2"></a>В2. Публикация по расписанию</h4>
+<ol>
+<li><strong>Schedule Trigger</strong> — каждые 15 минут.</li>
+<li><strong>Google Sheets</strong> — строки «время пришло, не опубликовано».</li>
+<li><strong>Telegram</strong> (канал), <strong>Facebook Graph API</strong> / Instagram через <strong>HTTP Request</strong> ❓ (нужны бизнес-аккаунты и права).</li>
+<li><strong>Google Sheets</strong> — отметка «опубликовано», ссылка на пост.</li>
+</ol>
+<h4><a id="v3"></a>В3. Брошенные корзины</h4>
+<p>Экран: <a href="#scr-cart">корзина</a> · нужно: <a href="#api-7">API-7</a></p>
+<ol>
+<li><strong>Schedule Trigger</strong> — каждый час.</li>
+<li><strong>HTTP Request</strong> → <code>GET /api/admin/carts/abandoned?olderThanHours=2</code> (<a href="#api-7">API-7</a>). Только корзины <strong>вошедших</strong> пользователей: у гостя есть лишь <code>SessionId</code>, связаться с ним нельзя (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Domain/Entities/Cart.cs#L11-L15" target="_blank" rel="noopener" class="gh">Cart.cs</a>).</li>
+<li><strong>IF</strong> — уже напоминали? (<strong>Data table</strong> с историей).</li>
+<li><strong>Send Email</strong> / <strong>Telegram</strong> — «Вы оставили 3 товара», ссылка на <code>/cart</code>. Второе письмо через 24 часа, промокод ❓ (промокодов в Perry нет, <a href="#growth">G6</a>).</li>
+<li>Эффект считаем <strong>в продажах</strong>, не в часах: при 500 брошенных корзинах, возврате 5 % ⚠️ и среднем чеке 1 200 грн ⚠️ ≈ 25 заказов ≈ <strong>30 000 грн оборота в месяц</strong>.</li>
+</ol>
+<h4><a id="v4"></a>В4. Email- и Telegram-рассылки</h4>
+<p>Экраны: <a href="#scr-wishlist">wishlist</a>, <a href="#scr-admin-users">пользователи</a></p>
+<ol>
+<li><strong>Schedule Trigger</strong> — по плану рассылок (Google Sheets).</li>
+<li><strong>HTTP Request</strong> — сегменты: топ товаров из wishlist (<code>GET /api/admin/wishlist/summary</code>, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/AdminWishlistController.cs#L101-L106" target="_blank" rel="noopener" class="gh">код</a>), покупатели без заказов 30 дней (<a href="#api-10">API-10</a>).</li>
+<li><strong>AI Agent</strong> — текст и тема письма; <strong>без персональных данных в промпте</strong> (<a href="#r5">R5</a>): имена подставляет <strong>Code</strong> после генерации.</li>
+<li><strong>Telegram «Send and Wait for Response»</strong> — одобрение.</li>
+<li><strong>Send Email</strong> (SMTP) или сервис рассылок ❓; учёт отписок обязателен.</li>
+</ol>
+<h4><a id="v5"></a>В5. AI-модерация и анализ отзывов</h4>
+<p>Экраны: <a href="#scr-reviews">отзывы на витрине</a>, <a href="#scr-admin-reviews">модерация</a>, <a href="#scr-specs">характеристики</a></p>
+<ol>
+<li><strong>Webhook</strong> <code>review.created</code> (<a href="#api-1">API-1</a>) или <strong>Schedule Trigger</strong> + <code>GET /api/reviews</code> (админ видит и скрытые, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ReviewController.cs#L96-L117" target="_blank" rel="noopener" class="gh">код</a>).</li>
+<li><strong>OpenAI</strong> — метка: <code>ok</code>, <code>spam</code>, <code>offensive</code>, <code>off_topic</code> (как скрытый отзыв на <a href="#scr-admin-reviews">рис. 16</a>), <code>personal_data</code> (email вместо имени, как на <a href="#scr-reviews">рис. 5</a>), <code>delivery_complaint</code>; тональность; краткое резюме.</li>
+<li><strong>Switch</strong> — <code>ok</code> и рейтинг ≥ 4 → в очередь «одобрить пачкой»; <code>spam</code> / <code>offensive</code> → предложить скрыть; <code>delivery_complaint</code> → в <a href="#g3">Г3</a>.</li>
+<li><strong>Telegram «Send and Wait for Response»</strong> — модератор одним нажатием подтверждает пачку → <code>PATCH /api/reviews/disable-many</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ReviewController.cs#L248-L258" target="_blank" rel="noopener" class="gh">код</a>).</li>
+<li><strong>Google Sheets</strong> — темы недели («жмут кроссовки», «долгая доставка») → в <a href="#v7">В7</a>.</li>
+</ol>
+<h4><a id="v6"></a>В6. Лиды и UTM в CRM</h4>
+<ol>
+<li><strong>Webhook</strong> — <code>order.created</code> с UTM (<a href="#api-1">API-1</a>; UTM в заказе нужно сохранять, <a href="#growth">G9</a>) и <strong>Form Trigger</strong> для заявок «подобрать товар».</li>
+<li><strong>Code</strong> — источник, кампания, сумма.</li>
+<li><strong>HubSpot</strong> / <strong>Pipedrive</strong> / <strong>Google Sheets</strong> ❓ (какую CRM — <a href="#q9">вопрос 9</a>) — создать или обновить контакт и сделку.</li>
+</ol>
+<h4><a id="v7"></a>В7. Еженедельный отчёт маркетинга</h4>
+<ol>
+<li><strong>Schedule Trigger</strong> — понедельник 09:00.</li>
+<li><strong>HTTP Request</strong> — заказы и суммы за неделю и прошлую неделю (<code>GET /api/orders/admin</code> уже отдаёт <code>totalAmountCompare</code>, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/OrdersController.cs#L142-L159" target="_blank" rel="noopener" class="gh">код</a>); популярные товары <code>GET /api/products/popular</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L238-L243" target="_blank" rel="noopener" class="gh">код</a>); wishlist; темы отзывов из <a href="#v5">В5</a>; публикации из <a href="#v2">В2</a>.</li>
+<li><strong>Code</strong> — таблица и проценты.</li>
+<li><strong>OpenAI</strong> — 5 выводов простым языком и 3 идеи на неделю.</li>
+<li><strong>Google Sheets</strong> + <strong>Telegram</strong> / <strong>Gmail</strong> — отчёт команде.</li>
+</ol>
+<h3><a id="v-api"></a>Связь с API Perry</h3>
+<p>Есть: товары, popular, wishlist summary и monthly, отзывы с модерацией, админские заказы со сравнением периодов. Нужно: вебхуки (<a href="#api-1">API-1</a>), брошенные корзины (<a href="#api-7">API-7</a>), сегменты покупателей (<a href="#api-10">API-10</a>), UTM в заказе.</p>
+<h3><a id="v-effect"></a>Эффект ⚠️ примерная оценка</h3>
+<p><strong>≈ 49 ч/мес</strong> → <strong>≈ 9 800 грн/мес</strong>, плюс <strong>≈ 30 000 грн оборота</strong> от брошенных корзин (<a href="#v3">В3</a>), который считаем отдельно, не как экономию часов.</p>
+<h3><a id="v-tech"></a>Технические требования</h3>
+<p>Бизнес-аккаунты соцсетей и их API-доступы ❓; Telegram-канал; SMTP или сервис рассылок с отписками; CRM ❓.</p>
+<h3><a id="v-complexity"></a>Сложность</h3>
+<p>В1, В2, В5, В7 — <strong>низкая–средняя</strong>; В3, В4 — <strong>средняя</strong> (нужны <a href="#api-7">API-7</a>, <a href="#api-10">API-10</a>); В6 — зависит от CRM.</p>
+<h3><a id="v-risks"></a>Риски</h3>
+<p>Публикация без проверки (неверная цена в посте) → одобрение обязательно (<a href="#r1">R1</a>). Рассылки без согласия → учёт подписок (<a href="#r5">R5</a>).</p>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#stream-g">→ далее: Поток Г. Продажи и поддержка</a></p>
+<hr />
+<h2><a id="stream-g"></a>9Г. Поток Г. Продажи и поддержка</h2>
+<h3><a id="sg-goal"></a>Цель</h3>
+<p>70 % вопросов «где мой заказ» и частых вопросов закрывает бот за секунды, днём и ночью. Сложные вопросы приходят человеку уже с резюме и данными заказа.</p>
+<h3><a id="sg-now"></a>Как сейчас → как будет</h3>
+<table>
+<thead>
+<tr>
+<th>Сейчас</th>
+<th>Будет</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Иконка Telegram в футере (<a href="#scr-wishlist">рис. 10</a>), бота нет ✅</td>
+<td>Telegram-бот Perry</td>
+</tr>
+<tr>
+<td>Оператор ищет заказ в <a href="#scr-admin-orders">админке</a> по номеру и пересказывает статус</td>
+<td>Бот сам находит заказ по номеру и email и отвечает (<a href="#g1">Г1</a>)</td>
+</tr>
+<tr>
+<td>«Как отменить заказ?» (<a href="#scr-order-modal">рис. 9</a>), «какая доставка?» — каждый раз заново</td>
+<td>Ответы из базы знаний (<a href="#g2">Г2</a>)</td>
+</tr>
+<tr>
+<td>Оператор читает всю переписку с начала</td>
+<td>Получает резюме и ссылку на заказ (<a href="#g3">Г3</a>)</td>
+</tr>
+</tbody>
+</table>
+<h3><a id="sg-scheme"></a>Схема</h3>
+<div class="mermaid-wrap"><pre class="mermaid">sequenceDiagram
+  autonumber
+  participant C as Клиент (Telegram)
+  participant B as n8n: Telegram Trigger + AI Agent
+  participant P as Product API
+  participant K as База знаний FAQ
+  participant H as Оператор
+  C-&gt;&gt;B: Где мой заказ #AT456BB?
+  B-&gt;&gt;C: Укажите email, на который оформлен заказ
+  C-&gt;&gt;B: email
+  B-&gt;&gt;P: GET /api/orders/admin?orderId=AT456BB (сервисный токен)
+  P--&gt;&gt;B: заказ, статус Shipped, userEmail
+  alt email совпал
+    B-&gt;&gt;C: Заказ отправлен, ТТН ..., ожидается завтра
+  else не совпал или заказа нет
+    B-&gt;&gt;C: Не нашёл, передаю оператору
+    B-&gt;&gt;H: резюме диалога + что проверено
+  end
+  C-&gt;&gt;B: Как отменить заказ?
+  B-&gt;&gt;K: поиск ответа (RAG)
+  K--&gt;&gt;B: правило отмены
+  B-&gt;&gt;C: ответ + кнопка «нужен человек»
+</pre></div>
+<h3><a id="sg-steps"></a>Шаги автоматизации</h3>
+<h4><a id="g1"></a>Г1. Бот «где мой заказ»</h4>
+<p>Экраны: <a href="#scr-my-orders">Мои заказы</a>, <a href="#scr-order-modal">детали заказа</a>, <a href="#scr-admin-orders">заказы в админке</a> · портфолио: <a href="#pf-2">ПФ-2</a></p>
+<ol>
+<li><strong>Telegram Trigger</strong> — новое сообщение боту.</li>
+<li><strong>AI Agent</strong> с памятью (<strong>Simple Memory</strong> / <strong>Postgres Chat Memory</strong>) — понять намерение: статус заказа, FAQ, жалоба, «позовите человека».</li>
+<li>Инструмент агента <strong>HTTP Request Tool</strong> → <code>GET /api/orders/admin?orderId=AT456BB</code> — поиск по номеру уже работает ✅ (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/OrderService.cs#L121-L138" target="_blank" rel="noopener" class="gh">OrderService.cs</a>); в ответе есть <code>status</code>, <code>items</code>, <code>userEmail</code> (если настроен канал к Auth) (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/OrdersController.cs#L203-L222" target="_blank" rel="noopener" class="gh">OrdersController.cs</a>).</li>
+<li><strong>Code</strong> — <strong>проверка владельца</strong>: email из ответа должен совпасть с тем, что ввёл клиент. Без этого бот выдаст чужой заказ (<a href="#r3">R3</a>). Лучше — отдельный узкий эндпоинт (<a href="#api-2">API-2</a>), который сам сверяет email и возвращает только статус.</li>
+<li><strong>Code</strong> — перевести статус на человеческий язык (<code>ReadyToPickup</code> → «ждёт в отделении»); при наличии — номер ТТН из <a href="#a4">А4</a>.</li>
+<li><strong>Telegram</strong> — ответ клиенту.</li>
+</ol>
+<h4><a id="g2"></a>Г2. Частые вопросы (FAQ)</h4>
+<p>Экраны: <a href="#scr-order-modal">детали заказа, «How to cancel order?»</a>, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/frontend/src/pages/SupportPages.tsx" target="_blank" rel="noopener" class="gh">страница FAQ</a></p>
+<ol>
+<li>База знаний: тексты FAQ, условия доставки, возврата, оплаты, legal-страниц (<code>/terms</code>, <code>/privacy</code>, <code>/license</code>, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/frontend/src/app/router.tsx#L50-L54" target="_blank" rel="noopener" class="gh">router.tsx</a>) → <strong>Vector Store</strong> n8n (<a href="#g-rag">RAG</a>).</li>
+<li>Инструмент агента <strong>Vector Store Tool</strong> — найти ответ.</li>
+<li>Правило в промпте: «отвечай только из базы знаний; не знаешь — скажи и предложи оператора».</li>
+<li><strong>Telegram</strong> — ответ + кнопка «Позвать человека».</li>
+</ol>
+<h4><a id="g3"></a>Г3. Передача человеку с резюме</h4>
+<ol>
+<li><strong>IF</strong> — клиент просит человека, агент не уверен, тема «деньги / возврат / жалоба», или пришла жалоба из <a href="#v5">В5</a>.</li>
+<li><strong>OpenAI</strong> — резюме: кто, что хочет, номер заказа, что бот уже проверил.</li>
+<li><strong>Telegram</strong> — в чат операторов с кнопкой «Взять»; клиенту — «оператор ответит до …».</li>
+<li><strong>Google Sheets</strong> — журнал обращений: время ответа, кто закрыл → в <a href="#d1">Д1</a>.</li>
+</ol>
+<h3><a id="sg-api"></a>Связь с API Perry</h3>
+<p>Есть: поиск заказа по номеру в <code>GET /api/orders/admin</code>. Но это <strong>админский</strong> эндпоинт: боту он даёт доступ ко всем заказам. Нужно: сервисный токен с узкой ролью и эндпоинт <code>POST /api/support/order-status</code> (номер + email → только статус и ТТН) (<a href="#api-2">API-2</a>).</p>
+<h3><a id="sg-effect"></a>Эффект ⚠️ примерная оценка</h3>
+<p><strong>≈ 40 ч/мес</strong> → <strong>≈ 8 000 грн/мес</strong>; время ответа с часов до секунд (<a href="#goals">метрики</a>).</p>
+<h3><a id="sg-tech"></a>Технические требования</h3>
+<p>Telegram-бот (BotFather), публичный HTTPS-адрес n8n для Telegram Trigger (через туннель или сервер, <a href="#tech">раздел 16</a>), ключ AI-провайдера, тексты FAQ (пишет человек).</p>
+<h3><a id="sg-complexity"></a>Сложность</h3>
+<p>Г1 — <strong>низкая</strong> на демо, <strong>средняя</strong> в бою (проверка владельца); Г2 — <strong>средняя</strong> (качество базы знаний); Г3 — <strong>низкая</strong>.</p>
+<h3><a id="sg-risks"></a>Риски</h3>
+<p>Утечка чужого заказа (<a href="#r3">R3</a>); бот обещает то, чего нет в правилах (<a href="#r1">R1</a>); <a href="#g-prompt-injection">prompt injection</a> в сообщениях клиентов — агенту не даём инструментов, которые что-то меняют.</p>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#stream-d">→ далее: Поток Д. Отчётность и контроль</a></p>
+<hr />
+<h2><a id="stream-d"></a>9Д. Поток Д. Отчётность и контроль</h2>
+<h3><a id="d-goal"></a>Цель</h3>
+<p>Руководитель утром за 30 секунд видит главное, а о проблемах (упали заказы, лежит API, тестовые товары на витрине) узнаёт <strong>раньше клиентов</strong>.</p>
+<h3><a id="d-now"></a>Как сейчас → как будет</h3>
+<table>
+<thead>
+<tr>
+<th>Сейчас</th>
+<th>Будет</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>На <a href="#scr-admin-dashboard">панели админки</a> нет цифр ✅; итоги видны только в <a href="#scr-admin-orders">заказах</a> за выбранный период</td>
+<td>Telegram-сводка в 09:00 (<a href="#d1">Д1</a>)</td>
+</tr>
+<tr>
+<td>Проблемы замечают случайно</td>
+<td>Алерты по правилам и аномалиям (<a href="#d2">Д2</a>)</td>
+</tr>
+</tbody>
+</table>
+<h3><a id="d-scheme"></a>Схема</h3>
+<div class="mermaid-wrap"><pre class="mermaid">flowchart LR
+  S1[&quot;Schedule Trigger 09:00&quot;] --&gt; L[&quot;HTTP Request&lt;br/&gt;/api/dev/admin-login локально&lt;br/&gt;или сервисный токен&quot;]
+  L --&gt; O[&quot;HTTP Request&lt;br/&gt;GET /api/orders/admin&lt;br/&gt;вчера и позавчера&quot;]
+  O --&gt; C[&quot;Code&lt;br/&gt;заказы, выручка, статусы,&lt;br/&gt;средний чек, сравнение&quot;]
+  C --&gt; AI[&quot;OpenAI&lt;br/&gt;3 вывода простым языком&quot;]
+  AI --&gt; TG[&quot;Telegram&lt;br/&gt;руководителю&quot;]
+  C --&gt; GS[&quot;Google Sheets&lt;br/&gt;история KPI&quot;]
+  S2[&quot;Schedule Trigger 15 мин&quot;] --&gt; H[&quot;HTTP Request&lt;br/&gt;GET /api/health&quot;]
+  H --&gt; IF{&quot;IF Unhealthy&lt;br/&gt;или аномалия&quot;}
+  GS --&gt; IF
+  IF --&gt;|&quot;да&quot;| AL[&quot;Telegram алерт&quot;]
+</pre></div>
+<h3><a id="d-steps"></a>Шаги автоматизации</h3>
+<h4><a id="d1"></a>Д1. Ежедневный KPI-дайджест</h4>
+<p>Экраны: <a href="#scr-admin-dashboard">панель</a>, <a href="#scr-admin-orders">заказы</a> · портфолио: <a href="#pf-1">ПФ-1</a></p>
+<ol>
+<li><strong>Schedule Trigger</strong> — каждый день 09:00 (Europe/Kyiv).</li>
+<li><strong>HTTP Request</strong> → токен: локально <code>POST /api/dev/admin-login</code> (только в Development, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/DevAdminAuthController.cs#L39-L45" target="_blank" rel="noopener" class="gh">код</a>); в бою — сервисный токен (<a href="#api-2">API-2</a>).</li>
+<li><strong>HTTP Request</strong> → <code>GET /api/orders/admin?fromUtc=…&amp;toUtc=…&amp;pageSize=100</code> — в ответе уже есть <code>totalOrders</code>, <code>totalAmount</code>, <code>statusCounts</code>, <code>totalOrderCompare</code>, <code>totalAmountCompare</code> ✅ (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/OrdersController.cs#L142-L159" target="_blank" rel="noopener" class="gh">код</a>). <strong>Ничего дописывать в Perry не нужно.</strong></li>
+<li><strong>HTTP Request</strong> → <code>GET /api/products/popular?take=5</code>, <code>GET /api/admin/wishlist/summary?take=5</code>.</li>
+<li><strong>Code</strong> — средний чек, доля отмен, сравнение со вчера в %.</li>
+<li><strong>OpenAI</strong> — 3 коротких вывода («отмены выросли до 14 %: проверьте товар X»).</li>
+<li><strong>Telegram</strong> — сообщение руководителю; <strong>Google Sheets</strong> — строка в историю.</li>
+</ol>
+<h4><a id="d2"></a>Д2. Алерты и аномалии</h4>
+<p>Экраны: <a href="#scr-home">главная</a>, <a href="#scr-admin-categories">категории</a>, <a href="#scr-mobile">мобильное</a></p>
+<ol>
+<li><strong>Schedule Trigger</strong> — каждые 15 минут: <code>GET /api/health</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Program.cs#L180-L194" target="_blank" rel="noopener" class="gh">код</a>); <code>Unhealthy</code> два раза подряд → алерт.</li>
+<li><strong>Schedule Trigger</strong> — каждый час: заказы за час против среднего за тот же час прошлой недели (из Google Sheets); падение &gt; 50 % ⚠️ → алерт.</li>
+<li><strong>Schedule Trigger</strong> — раз в день: <code>GET /api/products</code> и <code>GET /api/categories</code> → <strong>Code</strong> ищет тестовые названия («QA Cat…», «Smoke A12 Product» — они видны на <a href="#scr-home">рис. 1</a>, <a href="#scr-admin-categories">рис. 15</a>, <a href="#scr-mobile">рис. 19</a>) и товары без картинок.</li>
+<li><strong>Error Trigger</strong> — любой упавший воркфлоу n8n → алерт (контроль самой автоматизации).</li>
+<li><strong>Telegram</strong> — алерт с кнопкой «Принято».</li>
+</ol>
+<h3><a id="d-api"></a>Связь с API Perry</h3>
+<p>Д1 и Д2 работают <strong>на существующих эндпоинтах</strong>. Это самая быстрая победа и первый <a href="#pf-1">портфолио-воркфлоу</a>.</p>
+<h3><a id="d-effect"></a>Эффект ⚠️ примерная оценка</h3>
+<p><strong>≈ 21,5 ч/мес</strong> → <strong>≈ 4 300 грн/мес</strong>, плюс простои ловятся за 15–30 минут, а не к вечеру.</p>
+<h3><a id="d-tech"></a>Технические требования</h3>
+<p>Только n8n, Telegram-бот и доступ к Perry API.</p>
+<h3><a id="d-complexity"></a>Сложность</h3>
+<p><strong>Низкая</strong>: 0,5–1 день на каждый ⚠️.</p>
+<h3><a id="d-risks"></a>Риски</h3>
+<p>Ложные алерты утомляют → пороги подбираем 2 недели (<a href="#r7">R7</a>).</p>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#system">→ далее: Система автоматизации целиком</a></p>
+<hr />
+<h2><a id="system"></a>10. Система автоматизации целиком</h2>
+<p>Потоки А–Д — это не 22 отдельных «робота», а <strong>одна система</strong> из пяти слоёв. Если строить их по отдельности, через полгода получится зоопарк: у каждого воркфлоу свой токен, свои копии справочников, ошибки никто не видит. Поэтому сначала договариваемся об общей архитектуре.</p>
+<h3><a id="system-layers"></a>10.1. Пять слоёв</h3>
+<table>
+<thead>
+<tr>
+<th>Слой</th>
+<th>Что это</th>
+<th>Из чего состоит</th>
+<th>Где описано</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Источники событий</strong></td>
+<td>всё, что «происходит» в магазине</td>
+<td>Product API (заказ, статус, остаток, отзыв, товар), Telegram (сообщения клиентов), почта (прайсы), расписание</td>
+<td><a href="#api-1">API-1</a>, <a href="#g1">Г1</a>, <a href="#a1">А1</a></td>
+</tr>
+<tr>
+<td><strong>2. Шина событий</strong></td>
+<td>единая точка входа</td>
+<td>один <strong>Webhook</strong> n8n <code>/perry-events</code> с проверкой подписи <a href="#g-hmac">HMAC</a> → <strong>Switch</strong> по типу события → <strong>Execute Workflow</strong> нужного потока</td>
+<td><a href="#system-scheme">10.2</a></td>
+</tr>
+<tr>
+<td><strong>3. Исполнители</strong></td>
+<td>воркфлоу n8n, по одному на процесс</td>
+<td>А1…Д2, каждый — маленький под-воркфлоу с одной задачей</td>
+<td><a href="#stream-a">потоки</a></td>
+</tr>
+<tr>
+<td><strong>4. AI-слой</strong></td>
+<td>думает, но ничего не делает сам</td>
+<td><strong>AI-оркестратор</strong> выбирает, что запустить; специализированные агенты (контент, маркетинг, поддержка, модерация) пишут тексты и метки</td>
+<td><a href="#agents">раздел 11</a></td>
+</tr>
+<tr>
+<td><strong>5. Контроль</strong></td>
+<td>человек и журнал</td>
+<td>одобрения в Telegram (позже в админке), журнал действий, алерты об ошибках, метрики сэкономленных часов</td>
+<td><a href="#agents-hitl">11.2</a>, <a href="#agents-audit">11.3</a>, <a href="#d2">Д2</a></td>
+</tr>
+</tbody>
+</table>
+<p>Общие правила для всех воркфлоу:</p>
+<ul>
+<li><strong>Один сервисный токен</strong> Perry на всю систему, хранится в Credentials n8n, обновляется сам (<a href="#api-2">API-2</a>).</li>
+<li><strong>Справочники в одном месте</strong>: Data table n8n (характеристики, пороги, правила поставщиков).</li>
+<li><strong>Каждая запись в Perry — с ключом идемпотентности</strong> (<a href="#api-9">API-9</a>), чтобы повторный запуск не создал вторую ТТН.</li>
+<li><strong>Каждый воркфлоу пишет строку в журнал</strong>: что сделал, сколько минут ручной работы это заменило. Из журнала считаются <a href="#effect">часы и деньги</a>.</li>
+<li><strong>Всё, что касается денег, клиентов и публикаций, проходит через человека</strong> (<a href="#agents-hitl">11.2</a>).</li>
+</ul>
+<h3><a id="system-scheme"></a>10.2. Схема системы</h3>
+<div class="mermaid-wrap"><pre class="mermaid">flowchart TB
+  subgraph SRC[&quot;1. Источники событий&quot;]
+    PAPI[&quot;Product API Perry&lt;br/&gt;order.created, order.status_changed,&lt;br/&gt;product.stock_low, review.created&quot;]
+    TGIN[&quot;Telegram: клиенты, сотрудники&quot;]
+    MAILIN[&quot;Почта: прайсы поставщиков&quot;]
+    CRON[&quot;Расписание&quot;]
+  end
+  subgraph BUS[&quot;2. Шина n8n&quot;]
+    WH[&quot;Webhook /perry-events&lt;br/&gt;проверка HMAC&quot;]
+    SW{&quot;Switch по типу события&quot;}
+  end
+  subgraph AI[&quot;4. AI-слой&quot;]
+    ORC[&quot;AI-оркестратор&lt;br/&gt;AI Agent&quot;]
+    AGC[&quot;агент контента&quot;]
+    AGM[&quot;агент маркетинга&quot;]
+    AGS[&quot;агент поддержки&quot;]
+    AGR[&quot;агент модерации&quot;]
+  end
+  subgraph EXE[&quot;3. Исполнители: воркфлоу n8n&quot;]
+    WA[&quot;А: склад и логистика&quot;]
+    WB[&quot;Б: каталог&quot;]
+    WV[&quot;В: маркетинг&quot;]
+    WG[&quot;Г: поддержка&quot;]
+    WD[&quot;Д: отчёты&quot;]
+  end
+  subgraph CTRL[&quot;5. Контроль&quot;]
+    HITL([&quot;Человек: одобрить или отклонить&quot;])
+    LOG[(&quot;Журнал действий&lt;br/&gt;и сэкономленных минут&quot;)]
+    ERR[&quot;Error Trigger → алерт&quot;]
+  end
+  subgraph EXT[&quot;Внешние сервисы&quot;]
+    NP[&quot;Новая почта&quot;]
+    GS[&quot;Google Sheets&quot;]
+    SOC[&quot;Соцсети, email&quot;]
+    LLM[&quot;AI-модель&quot;]
+  end
+  PAPI --&gt; WH
+  TGIN --&gt; ORC
+  MAILIN --&gt; WA
+  CRON --&gt; WD
+  WH --&gt; SW
+  SW --&gt; WA
+  SW --&gt; WB
+  SW --&gt; WV
+  SW --&gt; ORC
+  ORC --&gt; WG
+  ORC --&gt; WA
+  ORC --&gt; WB
+  WB --&gt; AGC
+  WV --&gt; AGM
+  WG --&gt; AGS
+  WV --&gt; AGR
+  AGC --&gt; LLM
+  AGM --&gt; LLM
+  AGS --&gt; LLM
+  AGR --&gt; LLM
+  ORC --&gt; LLM
+  WA --&gt; NP
+  WA --&gt; GS
+  WV --&gt; SOC
+  WD --&gt; GS
+  WA --&gt;|&quot;HTTP Request&lt;br/&gt;сервисный токен&quot;| PAPI
+  WB --&gt; PAPI
+  WG --&gt; PAPI
+  WA --&gt; HITL
+  WB --&gt; HITL
+  WV --&gt; HITL
+  WA --&gt; LOG
+  WB --&gt; LOG
+  WV --&gt; LOG
+  WG --&gt; LOG
+  WD --&gt; LOG
+  EXE --&gt; ERR
+</pre></div>
+<h3><a id="system-data"></a>10.3. Где живут данные</h3>
+<table>
+<thead>
+<tr>
+<th>Данные</th>
+<th>Главный источник</th>
+<th>Кто читает</th>
+<th>Кто пишет</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Товары, остатки, цены</td>
+<td>Product API (PostgreSQL)</td>
+<td>все потоки</td>
+<td>А1 (остатки), Б1–Б3 (контент) — только через API</td>
+</tr>
+<tr>
+<td>Заказы и статусы</td>
+<td>Product API</td>
+<td>А3–А6, Г1, Д1</td>
+<td>А3–А6 через <code>PUT …/status</code></td>
+</tr>
+<tr>
+<td>Пользователи, email</td>
+<td>Auth / Admin Service</td>
+<td>Perry API по внутреннему каналу</td>
+<td>не пишем</td>
+</tr>
+<tr>
+<td>ТТН и статусы доставки</td>
+<td>«Новая почта»</td>
+<td>А5, Г1</td>
+<td>А4, А6</td>
+</tr>
+<tr>
+<td>Журнал автоматизации, KPI, очереди публикаций</td>
+<td>Google Sheets на старте ⚠️, позже отдельная таблица в PostgreSQL</td>
+<td>Д1, В7, отчёт об эффекте</td>
+<td>все воркфлоу</td>
+</tr>
+<tr>
+<td>Справочники, пороги</td>
+<td>Data table n8n</td>
+<td>все воркфлоу</td>
+<td>человек</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Правило:</strong> n8n <strong>не ходит в базу Perry напрямую</strong>, только через API. Так сохраняются проверки, которые уже есть в коде (остаток не уходит в минус, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/OrderService.cs#L293-L301" target="_blank" rel="noopener" class="gh">OrderService.cs</a>), и письма клиентам.</p>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#agents">→ далее: AI-агенты и оркестрация</a></p>
+<hr />
+<h2><a id="agents"></a>11. AI-агенты и оркестрация</h2>
+<h3><a id="agents-orc"></a>11.1. Оркестратор над воркфлоу</h3>
+<p><strong>Оркестратор</strong> (<a href="#g-orchestrator">глоссарий</a>) — это AI-агент-диспетчер, такой же по смыслу, как Grok Bot у Сергея: он получает задачу на обычном языке («почему вчера мало заказов?», «оформи возврат по #AT456BB», «подготовь посты про новые кроссовки»), <strong>сам выбирает, какие воркфлоу вызвать</strong>, собирает результат и отвечает.</p>
+<p>Как это собрать в n8n:</p>
+<ol>
+<li><strong>Telegram Trigger</strong> (чат сотрудников) или <strong>Chat Trigger</strong> (окно в админке, позже).</li>
+<li><strong>AI Agent</strong> — системный промпт: роль, правила, список инструментов, запреты.</li>
+<li>Инструменты агента — <strong>Call n8n Workflow Tool</strong>: каждый воркфлоу А–Д подключён как «инструмент» с понятным описанием и схемой входа. Агент не знает про НП или SQL, он знает «есть инструмент <code>create_ttn(orderId)</code>».</li>
+<li>Инструменты только для чтения (KPI, статус заказа, остатки) агент вызывает <strong>сам</strong>. Инструменты, которые что-то меняют, по умолчанию идут <strong>через одобрение</strong>.</li>
+<li><strong>MCP Server Trigger</strong> ✅ (есть в n8n) — тот же набор воркфлоу можно открыть внешнему агенту, например Grok Bot, по протоколу <a href="#g-mcp">MCP</a>.</li>
+</ol>
+<h3><a id="agents-hitl"></a>11.2. Человек в контуре (human-in-the-loop)</h3>
+<table>
+<thead>
+<tr>
+<th>Действие</th>
+<th>Кто решает</th>
+<th>Как</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Чтение данных: KPI, статус, остатки</td>
+<td>агент сам</td>
+<td>сразу</td>
+</tr>
+<tr>
+<td>Тексты-черновики (описания, посты)</td>
+<td>агент готовит, <strong>человек одобряет</strong></td>
+<td>Telegram «Send and Wait for Response»; в n8n есть «Human approval for tool calls» ✅</td>
+</tr>
+<tr>
+<td>Смена статуса заказа по трекингу НП</td>
+<td>автоматически по правилу</td>
+<td>правило, а не AI</td>
+</tr>
+<tr>
+<td>ТТН для заказа с полными данными</td>
+<td>автоматически</td>
+<td>при ошибке — человек</td>
+</tr>
+<tr>
+<td>Закупка у поставщика, возврат, изменение цены</td>
+<td><strong>только человек</strong></td>
+<td>кнопка «Одобрить» с суммой</td>
+</tr>
+<tr>
+<td>Публикация в соцсетях, рассылка клиентам</td>
+<td><strong>только человек</strong></td>
+<td>одобрение конкретного текста</td>
+</tr>
+<tr>
+<td>Удаление отзыва</td>
+<td><strong>только человек</strong></td>
+<td>предложение от AI, решение модератора</td>
+</tr>
+</tbody>
+</table>
+<h3><a id="agents-audit"></a>11.3. Журнал действий (audit log)</h3>
+<p>Каждое действие пишется одной строкой: время, воркфлоу, кто запустил (агент, расписание, человек), что сделано, ID объекта в Perry, кто одобрил, <strong>сколько минут ручной работы заменено</strong>. В Perry нужна пометка «изменено автоматизацией» (<a href="#api-9">API-9</a>), чтобы в админке было видно, кто поменял остаток: человек или робот.</p>
+<h3><a id="agents-cost"></a>11.4. Сколько стоят AI-вызовы ⚠️ примерная оценка</h3>
+<table>
+<thead>
+<tr>
+<th>Где AI</th>
+<th>Вызовов в месяц</th>
+<th>Токенов на вызов (вход / выход)</th>
+<th>Всего, млн токенов (вход / выход)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Бот поддержки <a href="#stream-g">Г1–Г3</a></td>
+<td>900 диалогов × 4 = 3 600</td>
+<td>3 000 / 300</td>
+<td>10,8 / 1,08</td>
+</tr>
+<tr>
+<td>Описания и характеристики <a href="#stream-b">Б1–Б2</a></td>
+<td>200</td>
+<td>2 000 / 1 000</td>
+<td>0,4 / 0,2</td>
+</tr>
+<tr>
+<td>Модерация отзывов <a href="#v5">В5</a></td>
+<td>300</td>
+<td>800 / 150</td>
+<td>0,24 / 0,05</td>
+</tr>
+<tr>
+<td>Посты, рассылки, отчёты <a href="#stream-v">В1, В4, В7</a></td>
+<td>60</td>
+<td>3 000 / 1 500</td>
+<td>0,18 / 0,09</td>
+</tr>
+<tr>
+<td>Оркестратор и Д1–Д2</td>
+<td>300</td>
+<td>3 000 / 500</td>
+<td>0,9 / 0,15</td>
+</tr>
+<tr>
+<td><strong>Итого</strong></td>
+<td></td>
+<td></td>
+<td><strong>≈ 12,5 / 1,6</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Цены OpenAI на 06.10.2026 ✅ (<a href="https://developers.openai.com/api/docs/pricing" target="_blank" rel="noopener">страница цен</a>): у «малых» моделей порядок <strong>$0,10–0,25 за 1 млн входных</strong> и <strong>$0,50–2,00 за 1 млн выходных</strong> токенов, у средних — около $2 / $10. Отсюда:</p>
+<ul>
+<li>малая модель: 12,5 × 0,25 + 1,6 × 2 ≈ <strong>$6–7 в месяц</strong> (≈ 250–300 грн ⚠️ по курсу ≈ 41–42 грн/$, ❓ сверить);</li>
+<li>средняя модель для сложных задач: 12,5 × 2 + 1,6 × 10 ≈ <strong>$41 в месяц</strong>.</li>
+</ul>
+<p>Вывод: AI-вызовы стоят <strong>меньше 1 %</strong> от сэкономленных ≈ 72 500 грн. Главная статья расходов — время на настройку и контроль, а не токены.</p>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#tools">→ далее: n8n или Make</a></p>
+<hr />
+<h2><a id="tools"></a>12. n8n или Make</h2>
+<p>Цены проверены 06.10.2026. n8n — по <a href="https://n8n.io/pricing/" target="_blank" rel="noopener">n8n.io/pricing</a> ✅. У Make официальная страница <a href="https://www.make.com/en/pricing" target="_blank" rel="noopener">make.com/en/pricing</a> не отдала цифры в текстовом виде, поэтому цены Make взяты из обзора <a href="https://www.jetadmin.io/blog/make-pricing/" target="_blank" rel="noopener">jetadmin.io</a> ⚠️, а лимиты — с официальной страницы ✅.</p>
+<table>
+<thead>
+<tr>
+<th>Критерий</th>
+<th>n8n</th>
+<th>Make</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Модель оплаты</strong></td>
+<td>за <strong>запуск воркфлоу целиком</strong> (<a href="#g-execution">execution</a>), сколько бы шагов в нём ни было ✅</td>
+<td>за <strong>каждое действие модуля</strong> (<a href="#g-credit">credit</a>): 1 модуль ≈ 1 кредит ✅</td>
+</tr>
+<tr>
+<td><strong>Облако, цена</strong></td>
+<td>Starter <strong>€24/мес</strong> помесячно или €20/мес при оплате за год, <strong>2 500 запусков</strong>; Pro <strong>€60/мес</strong> или €50/мес за год, <strong>10 000 запусков</strong>; Business €667/мес за год ✅</td>
+<td>Free — 1 000 кредитов ✅; Core ≈ <strong>$10,59/мес</strong> или $9/мес за год за 10 000 кредитов; Pro ≈ $18,82; Teams ≈ $34,12 ⚠️</td>
+</tr>
+<tr>
+<td><strong>Свой сервер (self-host)</strong></td>
+<td><strong>Да</strong>: Community Edition бесплатно, исходники на GitHub ✅; платишь только за сервер</td>
+<td><strong>Нет</strong>, только облако (AWS EU / Северная Америка) ✅</td>
+</tr>
+<tr>
+<td><strong>Лимиты</strong></td>
+<td>Starter: 5 одновременных запусков ✅; на своём сервере лимиты задаёт железо</td>
+<td>Free: 2 активных сценария, интервал от 15 мин, 5 мин на запуск; платные: интервал от 1 мин, до 40 мин на запуск ✅</td>
+</tr>
+<tr>
+<td><strong>AI</strong></td>
+<td>узел <strong>AI Agent</strong>, MCP Server Trigger и MCP Client, одобрение человеком для вызова инструментов ✅</td>
+<td>Make AI Agents (beta), MCP server ✅</td>
+</tr>
+<tr>
+<td><strong>Код</strong></td>
+<td>узел <strong>Code</strong> (JavaScript / Python) без доплат ✅</td>
+<td>Make Code App: 2 кредита за 1 с выполнения ✅</td>
+</tr>
+<tr>
+<td><strong>Порог входа</strong></td>
+<td>выше, ближе к программированию</td>
+<td>ниже, очень наглядный</td>
+</tr>
+<tr>
+<td><strong>Подходит Perry</strong></td>
+<td>✅ свой .NET API, нужен Code, много событий</td>
+<td>годится для простых связок «форма → таблица»</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Сколько запусков нужно Perry</strong> ⚠️: <code>order.created</code> 1 500 + смены статуса ≈ 4 500 + трекинг каждые 2 часа ≈ 240 + сообщения бота ≈ 3 600 + отчёты и алерты ≈ 3 500 (health каждые 15 мин ≈ 2 900) ≈ <strong>13 000 запусков в месяц</strong>. Это больше лимита n8n Pro в облаке (10 000). В Make тот же объём при 5–10 модулях на сценарий — <strong>65 000–130 000 кредитов</strong>, далеко за пределами 10 000 тарифа Core.</p>
+<p><strong>Рекомендация: n8n на своём сервере.</strong> Причины: (1) объём не упирается в тарифы, (2) данные клиентов остаются у магазина, (3) можно в Docker рядом с Perry, (4) Сергей уже ставит n8n локально, значит <a href="#portfolio">портфолио-воркфлоу</a> переносятся на сервер без переделки. Make оставляем как вариант для отделов, которым нужен очень простой визуальный конструктор.</p>
+<p>Локально (Windows, ноутбук Сергея) ❓ пример команды:</p>
+<pre class="code"><span class="lang">bash</span><code>docker run -it --rm --name n8n -p 5678:5678 \
+  -e GENERIC_TIMEZONE=Europe/Kyiv \
+  -v n8n_data:/home/node/.n8n \
+  docker.n8n.io/n8nio/n8n
+</code></pre>
+<p>Из контейнера n8n локальный Perry API открывается по адресу <code>http://host.docker.internal:5272</code> (не <code>localhost</code>: внутри контейнера это сам контейнер).</p>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#api-gaps">→ далее: Каких API не хватает</a></p>
+<hr />
+<h2><a id="api-gaps"></a>13. Каких API не хватает в Perry</h2>
+<p>Это работа в коде Product API, то есть <strong>в зоне Сергея</strong>: хороший кусок для портфолио «бэкенд под автоматизацию». Пункты, которые касаются Auth или админского бэкенда, помечены ❓ и требуют согласования.</p>
+<table>
+<thead>
+<tr>
+<th>№</th>
+<th>Что добавить</th>
+<th>Зачем</th>
+<th>Что есть сейчас</th>
+<th>Сложность ⚠️</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a id="api-1"></a>API-1</td>
+<td><strong>Исходящие вебхуки</strong>: <code>order.created</code>, <code>order.status_changed</code>, <code>product.created</code>, <code>product.stock_low</code>, <code>product.back_in_stock</code>, <code>review.created</code>. Подпись HMAC в заголовке, повтор при ошибке</td>
+<td>запуск потоков без опроса</td>
+<td>только письма в тех же местах кода (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/OrderService.cs#L357-L368" target="_blank" rel="noopener" class="gh">создание</a>, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/OrderService.cs#L387-L403" target="_blank" rel="noopener" class="gh">статус</a>)</td>
+<td>2–3 дня</td>
+</tr>
+<tr>
+<td><a id="api-2"></a>API-2</td>
+<td><strong>Сервисный токен для n8n</strong> с ролью <code>Automation</code> и узкими правами; эндпоинт <code>POST /api/support/order-status</code> (номер + email → статус)</td>
+<td>безопасный доступ без админского JWT</td>
+<td>для локальных демо есть <code>/api/dev/admin-login</code> (только Development, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/DevAdminAuthController.cs#L39-L45" target="_blank" rel="noopener" class="gh">код</a>); образец канала сервис-сервис — <code>internal/auth/token</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/AuthInternalClient.cs#L64-L96" target="_blank" rel="noopener" class="gh">код</a>); политики ролей (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Program.cs#L135-L141" target="_blank" rel="noopener" class="gh">код</a>)</td>
+<td>1–2 дня + ❓ Auth (<a href="#q3">вопрос 3</a>)</td>
+</tr>
+<tr>
+<td><a id="api-3"></a>API-3</td>
+<td><strong>Остатки</strong>: <code>GET /api/admin/stock?skus=…</code>, <code>PATCH /api/admin/stock/bulk</code> (SKU → количество)</td>
+<td>синхронизация без порчи товара</td>
+<td>только полный <code>PUT</code>, который перезаписывает фото и характеристики (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L617-L627" target="_blank" rel="noopener" class="gh">код</a>)</td>
+<td>1 день</td>
+</tr>
+<tr>
+<td><a id="api-4"></a>API-4</td>
+<td><strong>Точечные правки</strong>: <code>PATCH /api/products/{id}/content</code>, <code>/attributes</code> (с <code>IsFilterable</code>), <code>/images</code>; поиск по SKU</td>
+<td>AI-контент без потери данных</td>
+<td>поиск каталога только по названию и бренду (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L99-L100" target="_blank" rel="noopener" class="gh">код</a>)</td>
+<td>1–2 дня</td>
+</tr>
+<tr>
+<td><a id="api-5"></a>API-5</td>
+<td><strong>Доставка в заказе</strong>: телефон, <code>cityRef</code>, <code>warehouseRef</code>, <code>trackingNumber</code>, <code>carrierStatus</code>; <code>PUT /api/orders/{id}/shipment</code></td>
+<td>ТТН и трекинг НП</td>
+<td>одна строка <code>ShippingAddress</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Domain/Entities/Order.cs#L28-L33" target="_blank" rel="noopener" class="gh">Order.cs</a>), адрес-заглушка по умолчанию (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/OrderService.cs#L278-L280" target="_blank" rel="noopener" class="gh">код</a>)</td>
+<td>2 дня + поля на <a href="#scr-checkout">checkout</a></td>
+</tr>
+<tr>
+<td><a id="api-6"></a>API-6</td>
+<td><strong>Подписчики Notify</strong>: <code>GET …/stock-notify/pending</code>, <code>PATCH …/notified</code></td>
+<td>письма «снова в наличии»</td>
+<td>подписка пишется (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/StockNotifyController.cs#L56-L70" target="_blank" rel="noopener" class="gh">код</a>), <code>NotifiedAtUtc</code> не используется</td>
+<td>0,5 дня</td>
+</tr>
+<tr>
+<td><a id="api-7"></a>API-7</td>
+<td><strong>Брошенные корзины</strong>: <code>GET /api/admin/carts/abandoned?olderThanHours=…</code></td>
+<td>напоминания</td>
+<td><code>Cart.UpdatedAtUtc</code> есть (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Domain/Entities/Cart.cs#L19" target="_blank" rel="noopener" class="gh">Cart.cs</a>)</td>
+<td>0,5 дня</td>
+</tr>
+<tr>
+<td><a id="api-8"></a>API-8</td>
+<td><strong>Возврат на склад</strong>: <code>POST /api/admin/orders/{id}/restock</code>, причина возврата</td>
+<td>возвраты</td>
+<td><code>Returned</code> без возврата остатка (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/OrderService.cs#L373-L385" target="_blank" rel="noopener" class="gh">код</a>)</td>
+<td>1 день</td>
+</tr>
+<tr>
+<td><a id="api-9"></a>API-9</td>
+<td><strong>Идемпотентность и аудит</strong>: заголовок <code>Idempotency-Key</code>, поле «кем изменено» (<code>human</code> / <code>automation:&lt;workflow&gt;</code>)</td>
+<td>без дублей, понятный журнал</td>
+<td>нет</td>
+<td>1–2 дня</td>
+</tr>
+<tr>
+<td><a id="api-10"></a>API-10</td>
+<td><strong>Сегменты покупателей</strong>: число заказов, сумма, дата последнего заказа по <code>userId</code></td>
+<td>рассылки и CRM</td>
+<td>есть фильтр <code>userId</code> в админских заказах (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/OrdersController.cs#L84-L98" target="_blank" rel="noopener" class="gh">код</a>); ❓ данные пользователей в Admin Service</td>
+<td>1 день</td>
+</tr>
+</tbody>
+</table>
+<p>Как выглядит вебхук (<a href="#api-1">API-1</a>) в работе:</p>
+<div class="mermaid-wrap"><pre class="mermaid">sequenceDiagram
+  autonumber
+  participant U as Покупатель
+  participant P as Product API
+  participant Q as Очередь исходящих событий
+  participant N as n8n Webhook /perry-events
+  U-&gt;&gt;P: POST /api/orders/checkout
+  P-&gt;&gt;P: CreateFromCartAsync: заказ, списание остатка, письмо
+  P-&gt;&gt;Q: событие order.created (id, number, total)
+  Q-&gt;&gt;N: POST + X-Perry-Signature (HMAC) + Idempotency-Key
+  alt 2xx
+    N--&gt;&gt;Q: принято
+  else ошибка или таймаут
+    Q-&gt;&gt;N: повтор через 1, 5, 30 минут
+  end
+  N-&gt;&gt;P: GET /api/orders/id (сервисный токен API-2)
+</pre></div>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#effect">→ далее: Итоговая оценка эффекта</a></p>
+<hr />
+<h2><a id="effect"></a>14. Итоговая оценка эффекта</h2>
+<p>Все цифры ⚠️ <strong>примерная оценка</strong> при <a href="#goals">допущениях</a> (50 заказов в день) и <strong>примерной ставке 200 грн/ч</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Поток</th>
+<th>Ручных ч/мес</th>
+<th>Экономия ч/мес</th>
+<th>Экономия грн/мес</th>
+<th>Дополнительно</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#stream-a">А. Склад и логистика</a></td>
+<td>221,5</td>
+<td><strong>178,5</strong></td>
+<td><strong>35 700</strong></td>
+<td>меньше ошибок в ТТН</td>
+</tr>
+<tr>
+<td><a href="#stream-b">Б. Каталог и контент</a></td>
+<td>98,4</td>
+<td><strong>73,5</strong></td>
+<td><strong>14 700</strong></td>
+<td>чистые фильтры каталога</td>
+</tr>
+<tr>
+<td><a href="#stream-v">В. Маркетинг</a></td>
+<td>69</td>
+<td><strong>49</strong></td>
+<td><strong>9 800</strong></td>
+<td>≈ 30 000 грн оборота от брошенных корзин (<a href="#v3">В3</a>)</td>
+</tr>
+<tr>
+<td><a href="#stream-g">Г. Поддержка</a></td>
+<td>59</td>
+<td><strong>40</strong></td>
+<td><strong>8 000</strong></td>
+<td>ответ за секунды</td>
+</tr>
+<tr>
+<td><a href="#stream-d">Д. Отчётность</a></td>
+<td>25</td>
+<td><strong>21,5</strong></td>
+<td><strong>4 300</strong></td>
+<td>простои ловятся за 15 минут</td>
+</tr>
+<tr>
+<td><strong>Итого</strong></td>
+<td><strong>≈ 473</strong></td>
+<td><strong>≈ 362,5</strong></td>
+<td><strong>≈ 72 500</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Расходы ⚠️: сервер для n8n ≈ €10–20/мес, AI-вызовы ≈ $7–41/мес (<a href="#agents-cost">11.4</a>), сервис удаления фона ❓. Вместе <strong>&lt; 3 %</strong> от экономии.</p>
+<h3><a id="effect-ramp"></a>14.1. Как растёт экономия по месяцам</h3>
+<table>
+<thead>
+<tr>
+<th>Конец месяца</th>
+<th>Что запущено</th>
+<th>Экономия ч/мес (run-rate)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1-й (недели 1–4)</td>
+<td><a href="#d1">Д1</a>, <a href="#g1">Г1</a>, <a href="#a5">А5</a>, <a href="#a3">А3</a>, <a href="#a4">А4</a></td>
+<td>13,5 + 25 + 22 + 30 + 64 = <strong>154,5</strong></td>
+</tr>
+<tr>
+<td>2-й (недели 5–8)</td>
+<td>+ <a href="#a1">А1</a>, <a href="#a2">А2</a>, <a href="#b1">Б1</a>, <a href="#b2">Б2</a>, <a href="#g2">Г2</a>, <a href="#g3">Г3</a>, <a href="#v6">В6</a>, <a href="#v7">В7</a></td>
+<td>+ 130,5 = <strong>285</strong> ✅ цель 250 достигнута</td>
+</tr>
+<tr>
+<td>3-й (недели 9–12)</td>
+<td>+ <a href="#a6">А6</a>, <a href="#b3">Б3</a>, <a href="#b4">Б4</a>, <a href="#v1">В1</a>, <a href="#v2">В2</a>, <a href="#v4">В4</a>, <a href="#v5">В5</a>, <a href="#d2">Д2</a></td>
+<td>+ 77,5 = <strong>362,5</strong></td>
+</tr>
+</tbody>
+</table>
+<h3><a id="effect-500"></a>14.2. Честно про 500 часов</h3>
+<p><strong>При 50 заказах в день до 500 ч/мес не дотягиваем: получается ≈ 362.</strong> Почему и что с этим делать:</p>
+<ul>
+<li>От числа заказов зависят <a href="#a3">А3</a>, <a href="#a4">А4</a>, <a href="#a5">А5</a>, <a href="#a6">А6</a> и весь <a href="#stream-g">поток Г</a>: вместе <strong>163,5 ч</strong>. Остальные 199 ч от заказов почти не зависят.</li>
+<li>Чтобы выйти на 500, «заказная» часть должна вырасти до ≈ 301 ч, то есть в 1,84 раза: <strong>≈ 90–95 заказов в день</strong> ⚠️.</li>
+<li>Второй путь — добавить поток, которого в Perry нет, а в вакансии он <strong>первый</strong>: <strong>бухгалтерия и финансы</strong> (сверка оплат с банком, счета поставщикам, перенос данных между таблицами и учётной системой). Для магазина такого размера это ≈ 60–120 ч/мес ⚠️ ❓, но без доступа к реальным процессам считать это мы не можем.</li>
+<li>Цифру 500 из вакансии называем <strong>ориентиром для магазина, где больше заказов или больше ручных отделов</strong>. Говорить на собеседовании, что Perry «даст 500», нельзя: это было бы неправдой.</li>
+</ul>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#plan">→ далее: План внедрения</a></p>
+<hr />
+<h2><a id="plan"></a>15. План внедрения и портфолио</h2>
+<h3><a id="plan-gantt"></a>15.1. График на 12 недель</h3>
+<p>Принцип: сначала <a href="#g-quickwin">быстрые победы</a> на существующих эндпоинтах, потом то, что требует доработки API.</p>
+<div class="mermaid-wrap"><pre class="mermaid">gantt
+  title План внедрения, недели от старта
+  dateFormat YYYY-MM-DD
+  axisFormat нед %W
+  tickInterval 1week
+  section Основа
+  n8n в Docker, бэкапы, секреты       :base1, 1970-01-05, 5d
+  API-2 сервисный токен                :base2, 1970-01-05, 7d
+  API-1 вебхуки + API-9 идемпотентность :base3, 1970-01-12, 10d
+  section Быстрые победы
+  Д1 KPI-дайджест                       :d1, 1970-01-05, 3d
+  Г1 бот где мой заказ                  :g1, 1970-01-08, 7d
+  А5 трекинг НП                         :a5, 1970-01-15, 5d
+  А3 сборочные листы                    :a3, 1970-01-19, 4d
+  section Склад и логистика
+  API-5 доставка в заказе               :api5, 1970-01-19, 7d
+  А4 ТТН Новой почты                    :a4, 1970-01-26, 6d
+  API-3 остатки + А2 алерты             :a2, 1970-02-02, 7d
+  А1 прайсы поставщиков                 :a1, 1970-02-09, 10d
+  section Каталог и поддержка
+  API-4 точечные правки + Б1 Б2          :b1, 1970-02-02, 14d
+  Г2 FAQ и Г3 эскалация                 :g2, 1970-02-09, 7d
+  В6 CRM и В7 отчёт                     :v7, 1970-02-16, 7d
+  section Маркетинг и контроль
+  Б3 фото и Б4 цены                     :b3, 1970-03-02, 10d
+  В1 В2 посты, В4 рассылки              :v1, 1970-03-02, 12d
+  В5 модерация, А6 возвраты             :v5, 1970-03-09, 10d
+  Д2 аномалии                           :d2, 1970-03-16, 5d
+  Оркестратор поверх всех воркфлоу      :orc, 1970-03-09, 17d
+</pre></div>
+<p>Каждую неделю: замер «до» (секундомер, 10 повторов ⚠️), запуск, через неделю — сверка с журналом запусков и пересчёт часов. Автоматизация, которой не пользуются, <strong>не считается</strong> (<a href="#vacancy">вакансия</a> прямо об этом говорит).</p>
+<h3><a id="portfolio"></a>15.2. Что сделать первым для портфолио</h3>
+<p>Три воркфлоу, которые Сергей может собрать в <strong>локальном n8n против локального Perry API</strong> (<code>dotnet run</code> → <code>http://host.docker.internal:5272</code>) и показать на собеседовании. Для каждого — формула «было → стало → часы → деньги».</p>
+<h4><a id="pf-1"></a>ПФ-1. Утренний KPI-дайджест в Telegram</h4>
+<p>Основа — <a href="#d1">Д1</a>. Работает <strong>без изменений в коде Perry</strong>.</p>
+<ol>
+<li><strong>Schedule Trigger</strong> 09:00 → 2. <strong>HTTP Request</strong> <code>POST /api/dev/admin-login</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/DevAdminAuthController.cs#L39-L74" target="_blank" rel="noopener" class="gh">код</a>) → 3. <strong>HTTP Request</strong> <code>GET /api/orders/admin?fromUtc=…&amp;toUtc=…</code> с <code>Authorization: Bearer {{token}}</code> → 4. <strong>Code</strong>: заказы, выручка, <code>statusCounts</code>, сравнение со вчера → 5. <strong>OpenAI</strong>: 3 вывода → 6. <strong>Telegram</strong>.</li>
+</ol>
+<p><strong>Что показать:</strong> живое сообщение в Telegram; экран <a href="#scr-admin-orders">заказов в админке</a> с теми же цифрами. <strong>Было:</strong> 30 мин в день открывать админку и считать. <strong>Стало:</strong> 0. <strong>Итого:</strong> 15 ч/мес ≈ 3 000 грн/мес ⚠️ на одного руководителя.</p>
+<h4><a id="pf-2"></a>ПФ-2. Telegram-бот «Где мой заказ?»</h4>
+<p>Основа — <a href="#g1">Г1</a>.</p>
+<ol>
+<li><strong>Telegram Trigger</strong> → 2. <strong>AI Agent</strong> (память <strong>Simple Memory</strong>) с инструментом <strong>HTTP Request Tool</strong> <code>GET /api/orders/admin?orderId={{номер}}</code> → 3. <strong>Code</strong>: сверить email, перевести статус → 4. <strong>Telegram</strong> ответ; 5. ветка <strong>IF</strong> «не нашёл» → <strong>Telegram</strong> в чат оператора.</li>
+</ol>
+<p><strong>Что показать:</strong> диалог с ботом по реальному номеру из <a href="#scr-my-orders">«Мои заказы»</a>; честно сказать, что в бою нужен узкий эндпоинт <a href="#api-2">API-2</a> вместо админского. <strong>Итого:</strong> ≈ 25 ч/мес ≈ 5 000 грн/мес ⚠️.</p>
+<h4><a id="pf-3"></a>ПФ-3. AI-описание товара с одобрением человеком</h4>
+<p>Основа — <a href="#b1">Б1</a>. Показывает самое ценное для вакансии: <strong>AI + API + человек в контуре</strong>.</p>
+<div class="mermaid-wrap"><pre class="mermaid">flowchart LR
+  T[&quot;Webhook или Manual Trigger&lt;br/&gt;productId&quot;] --&gt; G[&quot;HTTP Request&lt;br/&gt;GET /api/products/update/id&quot;]
+  G --&gt; AI[&quot;AI Agent&lt;br/&gt;описание, about, SEO&quot;]
+  AI --&gt; CHK[&quot;Code&lt;br/&gt;нет выдуманных фактов?&quot;]
+  CHK --&gt; APR{&quot;Telegram&lt;br/&gt;Send and Wait&lt;br/&gt;Одобрить?&quot;}
+  APR --&gt;|&quot;Одобрить&quot;| PUT[&quot;HTTP Request&lt;br/&gt;PUT /api/products/id&lt;br/&gt;с IsFilterable из исходника&quot;]
+  APR --&gt;|&quot;Переписать&quot;| AI
+  PUT --&gt; LOG[&quot;Google Sheets&lt;br/&gt;журнал: минут сэкономлено&quot;]
+</pre></div>
+<p>Важно для демо ✅: пока нет <a href="#api-4">API-4</a>, в <code>PUT</code> нужно <strong>вернуть все поля товара</strong>, а флаг <code>IsFilterable</code> проставить самому для «Color / Size / Fabric type»: его нет ни в <code>GET …/update/{id}</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L221-L223" target="_blank" rel="noopener" class="gh">код</a>), ни в полной карточке <code>GET /api/products/{id}</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/ProductsController.cs#L286-L288" target="_blank" rel="noopener" class="gh">код</a>). Иначе пропадут фильтры <a href="#scr-catalog">каталога</a>. Сам этот нюанс — хороший рассказ на собеседовании: «я знаю бэкенд и вижу, где автоматизация может сломать данные».</p>
+<p><strong>Итого:</strong> 25 → 7 мин на товар, ≈ 29 ч/мес ≈ 5 800 грн/мес ⚠️ при 100 товарах.</p>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#tech">→ далее: Технические требования</a></p>
+<hr />
+<h2><a id="tech"></a>16. Технические требования</h2>
+<table>
+<thead>
+<tr>
+<th>Тема</th>
+<th>Что нужно</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Сервер</strong></td>
+<td>VPS 2 vCPU / 4 ГБ RAM / 40 ГБ SSD ⚠️ (≈ €10–20/мес), Docker Compose: n8n + PostgreSQL для n8n (не SQLite) + обратный прокси с HTTPS (Caddy или Nginx). Perry API уже собирается в Docker (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docker-compose.yml#L29-L59" target="_blank" rel="noopener" class="gh">docker-compose.yml</a>)</td>
+</tr>
+<tr>
+<td><strong>Публичный адрес</strong></td>
+<td>HTTPS-домен для вебхуков (Telegram и Perry). Локально — туннель (ngrok или Cloudflare Tunnel) ❓</td>
+</tr>
+<tr>
+<td><strong>Секреты</strong></td>
+<td>ключи НП, AI, Telegram, сервисный секрет Perry — только в Credentials n8n и <code>.env</code>, не в git. В Perry секреты уже читаются из env (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Program.cs#L11-L25" target="_blank" rel="noopener" class="gh">Program.cs</a>), credential к Auth — тоже из env (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/AuthInternalClient.cs#L21-L25" target="_blank" rel="noopener" class="gh">AuthInternalClient.cs</a>). <code>N8N_ENCRYPTION_KEY</code> сохранить отдельно</td>
+</tr>
+<tr>
+<td><strong>Безопасность</strong></td>
+<td>вебхуки с подписью HMAC (<a href="#api-1">API-1</a>); сервисный токен с минимальными правами (<a href="#api-2">API-2</a>); 2FA в n8n; доступ к n8n только по HTTPS; Production Perry без <code>dev/admin-login</code> (в коде он уже возвращает 404 вне Development ✅, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Api/Controllers/DevAdminAuthController.cs#L43-L45" target="_blank" rel="noopener" class="gh">код</a>); персональные данные в AI не отправляем (<a href="#r5">R5</a>)</td>
+</tr>
+<tr>
+<td><strong>Бэкапы</strong></td>
+<td>ежедневный дамп PostgreSQL n8n и Perry, экспорт воркфлоу в git (JSON) раз в день, проверка восстановления раз в месяц</td>
+</tr>
+<tr>
+<td><strong>Мониторинг</strong></td>
+<td><a href="#d2">Д2</a>: health Perry, Error Trigger n8n, алерты в Telegram</td>
+</tr>
+<tr>
+<td><strong>Тесты</strong></td>
+<td>новые эндпоинты <a href="#api-gaps">API-1…10</a> покрываем xUnit, как существующие 15 тестов (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/tests/Perry.Tests/OrderServiceTests.cs" target="_blank" rel="noopener" class="gh">OrderServiceTests.cs</a>)</td>
+</tr>
+</tbody>
+</table>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#risks">→ далее: Риски</a></p>
+<hr />
+<h2><a id="risks"></a>17. Риски</h2>
+<table>
+<thead>
+<tr>
+<th>№</th>
+<th>Риск</th>
+<th>Чем грозит</th>
+<th>Что делаем</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a id="r1"></a>R1</td>
+<td>AI ошибается или выдумывает (<a href="#g-hallucination">галлюцинации</a>)</td>
+<td>неверное описание, цена в посте, обещание в чате</td>
+<td>одобрение человеком (<a href="#agents-hitl">11.2</a>), проверки в Code, ответы бота только из базы знаний</td>
+</tr>
+<tr>
+<td><a id="r2"></a>R2</td>
+<td>Ошибка в данных поставщика</td>
+<td>обнулённые остатки, продажа того, чего нет</td>
+<td>порог расхождения, одобрение, журнал и откат</td>
+</tr>
+<tr>
+<td><a id="r3"></a>R3</td>
+<td>Бот показывает чужой заказ</td>
+<td>утечка персональных данных</td>
+<td>сверка email, узкий эндпоинт <a href="#api-2">API-2</a></td>
+</tr>
+<tr>
+<td><a id="r4"></a>R4</td>
+<td>Меняется API «Новой почты» или соцсетей</td>
+<td>воркфлоу падают</td>
+<td>Error Trigger, алерты, версия API в одном месте</td>
+</tr>
+<tr>
+<td><a id="r5"></a>R5</td>
+<td>Персональные данные уходят в AI-модель</td>
+<td>нарушение закона о защите данных</td>
+<td>обезличивание: имена и телефоны подставляем после генерации</td>
+</tr>
+<tr>
+<td><a id="r6"></a>R6</td>
+<td>Парсинг сайтов конкурентов против их правил</td>
+<td>блокировка, претензии</td>
+<td>только разрешённые источники и фиды</td>
+</tr>
+<tr>
+<td><a id="r7"></a>R7</td>
+<td>Много ложных алертов</td>
+<td>их перестают читать</td>
+<td>2 недели подбора порогов, сводка вместо потока</td>
+</tr>
+<tr>
+<td><a id="r8"></a>R8</td>
+<td>Автоматизацией не пользуются</td>
+<td>часы на бумаге, а не в жизни</td>
+<td>обучение команды, метрика использования (<a href="#goals">метрики</a>)</td>
+</tr>
+<tr>
+<td><a id="r9"></a>R9</td>
+<td>Чужие зоны (Auth, админка) не готовы к изменениям</td>
+<td>блок на API-2, API-10</td>
+<td>ранний разговор с командой (<a href="#questions">вопросы</a>), временные обходы через dev-вход только локально</td>
+</tr>
+</tbody>
+</table>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#questions">→ далее: Открытые вопросы</a></p>
+<hr />
+<h2><a id="questions"></a>18. Открытые вопросы (❓ требует уточнения)</h2>
+<ol>
+<li><a id="q1"></a>Реальный объём: сколько заказов в день, SKU, поставщиков, обращений? Все цифры в <a href="#map">карте процессов</a> — допущения.</li>
+<li><a id="q2"></a>Реальная стоимость часа сотрудников вместо примерных 200 грн/ч.</li>
+<li><a id="q3"></a>Даст ли Auth-сервис (Влад) отдельный сервисный аккаунт <code>n8n-automation</code> с ролью <code>Automation</code> (<a href="#api-2">API-2</a>)?</li>
+<li><a id="q4"></a>Можно ли n8n читать Admin Service (пользователи) и кто владелец изменений в админском бэкенде (<a href="#admin-ux">раздел 5</a>)?</li>
+<li><a id="q5"></a>Может ли Auth слать вебхук «пользователь зарегистрирован» для приветственной серии (<a href="#v4">В4</a>)?</li>
+<li><a id="q6"></a>Что точно значит каждый статус заказа (<code>Received</code> = «бывший Paid» или «получено клиентом»?) и как они сопоставляются со статусами НП (<a href="#a5">А5</a>)?</li>
+<li><a id="q7"></a>Будут ли ячейки хранения на складе для сборочных листов (<a href="#a3">А3</a>)?</li>
+<li><a id="q8"></a>Где брать вес и габариты товара для ТТН (<a href="#a4">А4</a>)?</li>
+<li><a id="q9"></a>Какая CRM: своя, HubSpot, Pipedrive, KeyCRM или таблица (<a href="#v6">В6</a>)?</li>
+<li><a id="q10"></a>Какой платёжный провайдер и будет ли его вебхук «оплачено» (<a href="#growth">G2</a>)?</li>
+<li><a id="q11"></a>Точные имена методов справочников НП и лимит номеров в одном запросе трекинга (<a href="#a4">А4</a>, <a href="#a5">А5</a>).</li>
+<li><a id="q12"></a>Есть ли доступ к финансовым процессам для потока «финансы», без которого 500 ч/мес недостижимы (<a href="#effect-500">14.2</a>)?</li>
+</ol>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#final">→ далее: Итоговая схема</a></p>
+<hr />
+<h2><a id="final"></a>19. Итоговая схема: как всё работает от заказа до доставки</h2>
+<p>Это вся <a href="#system">система автоматизации</a> на одном рисунке: путь одного заказа от клика «Place order» до отзыва и следующей рассылки. В центре — <strong>AI-агент-оркестратор</strong>: он получает события, запускает воркфлоу n8n, ходит в API Perry и во внешние сервисы. <strong>Красные узлы со скруглёнными краями — места, где решает человек.</strong> Пунктир — то, чего в Perry ещё нет и нужно добавить.</p>
+<div class="mermaid-wrap"><pre class="mermaid">flowchart TB
+  classDef human fill:#ffe1e1,stroke:#d43b3b,color:#5a1010,stroke-width:2px
+  classDef perry fill:#e3ecff,stroke:#2f5fd0,color:#10224f
+  classDef ext fill:#eef9d6,stroke:#6a9a12,color:#243400
+  classDef ai fill:#fff3c4,stroke:#c79a00,color:#3d2f00,stroke-width:3px
+  classDef wf fill:#f3f4f8,stroke:#6b7280,color:#1f2937
+
+  C1[&quot;1. Клиент: Place order&lt;br/&gt;витрина или мобильное&quot;]:::perry
+  PAY[&quot;2. Оплата&lt;br/&gt;платёжный провайдер ❓&quot;]:::ext
+  API[&quot;Product API Perry&lt;br/&gt;checkout: заказ #AT456BB&quot;]:::perry
+  RES[&quot;3. Резерв на складе&lt;br/&gt;списание StockQuantity&lt;br/&gt;уже есть в коде&quot;]:::perry
+  EVT[&quot;вебхук order.created&lt;br/&gt;API-1, нужно добавить&quot;]:::perry
+
+  ORC{{&quot;AI-агент-оркестратор&lt;br/&gt;n8n AI Agent&lt;br/&gt;выбирает воркфлоу,&lt;br/&gt;пишет журнал&quot;}}:::ai
+
+  WA3[&quot;А3 сборочный лист&lt;br/&gt;Google Sheets + PDF&quot;]:::wf
+  PICK([&quot;Склад: собрать&lt;br/&gt;и упаковать&quot;]):::human
+  WA4[&quot;4. А4 ТТН&lt;br/&gt;InternetDocument.save&quot;]:::wf
+  NP[&quot;API Новой почты&quot;]:::ext
+  FIX([&quot;Оператор: исправить&lt;br/&gt;адрес или телефон&quot;]):::human
+  NOTI[&quot;5. Уведомление клиенту&lt;br/&gt;номер ТТН: Telegram, email&quot;]:::wf
+  WA5[&quot;6. А5 трекинг каждые 2 ч&lt;br/&gt;getStatusDocuments&quot;]:::wf
+  ST[&quot;PUT /api/orders/id/status&lt;br/&gt;Shipped, ReadyToPickup&lt;br/&gt;письмо клиенту из Perry&quot;]:::perry
+  DEL[&quot;7. Доставка: клиент&lt;br/&gt;забирает посылку&quot;]:::ext
+  BOT[&quot;Г1 бот: где мой заказ&lt;br/&gt;в любой момент&quot;]:::wf
+  RET[&quot;А6 возврат&quot;]:::wf
+  RETH([&quot;Оператор: одобрить&lt;br/&gt;возврат и деньги&quot;]):::human
+  REV[&quot;8. Запрос отзыва&lt;br/&gt;через 3 дня&quot;]:::wf
+  MOD[&quot;В5 AI-модерация отзыва&lt;br/&gt;метка + решение&quot;]:::wf
+  MODH([&quot;Модератор: Approve&lt;br/&gt;или Delete&quot;]):::human
+  AN[&quot;9. Аналитика&lt;br/&gt;Д1 KPI, В7 отчёт, Д2 алерты&quot;]:::wf
+  MK[&quot;10. Маркетинг&lt;br/&gt;В1 посты, В4 рассылки, В3 корзины&quot;]:::wf
+  MKH([&quot;Маркетолог: одобрить&lt;br/&gt;текст публикации&quot;]):::human
+  STK[&quot;А1, А2 остатки и закупки&quot;]:::wf
+  STKH([&quot;Закупки: одобрить&lt;br/&gt;заказ поставщику&quot;]):::human
+  LLM[&quot;AI-модель&quot;]:::ext
+  LOG[(&quot;Журнал действий&lt;br/&gt;и сэкономленных минут&quot;)]:::wf
+
+  C1 --&gt; PAY --&gt; API
+  C1 --&gt; API
+  API --&gt; RES --&gt; EVT -.-&gt; ORC
+  ORC --&gt; WA3 --&gt; PICK --&gt; WA4
+  WA4 --&gt; NP
+  WA4 --&gt;|&quot;нет данных&quot;| FIX --&gt; WA4
+  WA4 --&gt;|&quot;ТТН в заказ, API-5&quot;| API
+  WA4 --&gt; NOTI
+  ORC --&gt; WA5 --&gt; NP
+  WA5 --&gt; ST --&gt; DEL
+  DEL --&gt;|&quot;возврат&quot;| RET --&gt; RETH --&gt; API
+  DEL --&gt; REV --&gt; MOD --&gt; MODH --&gt; API
+  ORC --&gt; BOT
+  BOT --&gt;|&quot;HTTP Request&quot;| API
+  ORC --&gt; AN --&gt; MK --&gt; MKH
+  MK --&gt;|&quot;новый заказ&quot;| C1
+  RES --&gt;|&quot;мало на складе&quot;| STK --&gt; STKH
+  ORC &lt;--&gt; LLM
+  ORC --&gt; LOG
+  AN --&gt; LOG
+</pre></div>
+<h3><a id="final-steps"></a>19.1. По шагам</h3>
+<ol>
+<li><strong>Заказ.</strong> Клиент нажимает Place order на <a href="#scr-checkout">checkout</a> или в <a href="#scr-mobile">мобильном</a>. Perry создаёт заказ с номером вида <code>#AT456BB</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/OrderService.cs#L303-L321" target="_blank" rel="noopener" class="gh">OrderService.cs</a>). Чтобы дальше всё работало, на checkout нужны телефон и отделение НП (<a href="#api-5">API-5</a>, <a href="#growth">G1</a>).</li>
+<li><strong>Оплата.</strong> Сейчас оплата демонстрационная (<a href="#growth">G2</a>). В бою провайдер шлёт вебхук «оплачено», и заказ идёт дальше ❓ (<a href="#q10">вопрос 10</a>).</li>
+<li><strong>Резерв на складе.</strong> Perry уже проверяет и списывает остаток, на нуле ставит <code>OutOfStock</code> (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/OrderService.cs#L344-L351" target="_blank" rel="noopener" class="gh">код</a>). Если остаток стал мал, оркестратор запускает <a href="#a2">А2</a> → <strong>человек одобряет закупку</strong>.</li>
+<li><strong>Накладная.</strong> Событие <a href="#api-1"><code>order.created</code></a> попадает к оркестратору. Он запускает <a href="#a3">А3</a> (сборочный лист → <strong>склад собирает</strong>), затем <a href="#a4">А4</a> (ТТН через API НП). Нет данных → <strong>оператор исправляет</strong>.</li>
+<li><strong>Уведомления.</strong> Номер ТТН сохраняется в заказ и уходит клиенту в Telegram или по email (<a href="#a4">А4</a>, шаг 9). Письмо о смене статуса Perry шлёт сам (<a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/src/Perry.Infrastructure/Services/OrderService.cs#L387-L403" target="_blank" rel="noopener" class="gh">код</a>).</li>
+<li><strong>Трекинг.</strong> Каждые 2 часа <a href="#a5">А5</a> спрашивает НП и двигает статус в Perry. В любой момент клиент может спросить <a href="#g1">бота</a>.</li>
+<li><strong>Доставка.</strong> Клиент забирает посылку. Возврат идёт по <a href="#a6">А6</a> → <strong>оператор одобряет деньги</strong>.</li>
+<li><strong>Запрос отзыва.</strong> Через 3 дня после «получено» клиент получает просьбу оставить отзыв. Новый отзыв проходит <a href="#v5">AI-модерацию</a> → <strong>модератор подтверждает</strong> в <a href="#scr-admin-reviews">админке</a>.</li>
+<li><strong>Аналитика.</strong> Всё, что произошло, попадает в <a href="#agents-audit">журнал</a>, <a href="#d1">KPI-дайджест</a>, <a href="#v7">отчёт маркетинга</a> и <a href="#d2">алерты</a>.</li>
+<li><strong>Маркетинг.</strong> Из аналитики рождаются посты, рассылки и напоминания о корзине (<a href="#v1">В1</a>, <a href="#v4">В4</a>, <a href="#v3">В3</a>) → <strong>маркетолог одобряет</strong> → клиент возвращается и делает новый заказ (шаг 1).</li>
+</ol>
+<p><strong>Сколько человека остаётся в этом цикле:</strong> собрать коробку, одобрить закупки, возвраты, публикации и спорные отзывы. Всё остальное — набор данных, переписывание и ответы на одни и те же вопросы — делает система. Это и есть те ≈ 362 часа в месяц из <a href="#effect">раздела 14</a>.</p>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#sources">→ далее: Источники</a></p>
+<hr />
+<h2><a id="sources"></a>20. Источники</h2>
+<p><strong>Проект Perry</strong> (коммит <code>bcaec5f</code>):</p>
+<ul>
+<li>Репозиторий <a href="https://github.com/Teslyar75/My_Amazon2" target="_blank" rel="noopener" class="gh">Teslyar75/My_Amazon2</a> и зеркало <a href="https://github.com/ITSTEP-PERRY/Back_end_for_our_poroject" target="_blank" rel="noopener">ITSTEP-PERRY/Back_end_for_our_poroject</a>.</li>
+<li><a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/README.md" target="_blank" rel="noopener" class="gh">README.md</a>, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/README.md" target="_blank" rel="noopener" class="gh">docs/README.md</a>, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/%D1%81%D1%82%D1%8B%D0%BA%D0%B8/AUTH-INTEGRATION.md" target="_blank" rel="noopener" class="gh">docs/стыки/AUTH-INTEGRATION.md</a>, <a href="https://github.com/Teslyar75/My_Amazon2/blob/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/project_defense/DEFENSE_BACKEND.md" target="_blank" rel="noopener" class="gh">project_defense/DEFENSE_BACKEND.md</a>.</li>
+<li>Скриншоты: <a href="https://github.com/Teslyar75/My_Amazon2/tree/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/docs/screenshots/2026-10-04" target="_blank" rel="noopener" class="gh">docs/screenshots/2026-10-04</a> (43 кадра); кадры спринта 19.09.2026 и мобильный скрин — из локальной копии <code>D:\Perry\My_Amazon2</code>.</li>
+<li>Диаграммы защиты: <a href="https://github.com/Teslyar75/My_Amazon2/tree/bcaec5fc8ab617830197b5fe69a976c6f214cb3e/project_defense/views_project" target="_blank" rel="noopener" class="gh">project_defense/views_project</a> (18 PNG).</li>
+</ul>
+<p><strong>Вакансия:</strong> <a href="https://www.work.ua/jobs/8532037/" target="_blank" rel="noopener">work.ua/jobs/8532037</a> — AI Automation, Process Optimization Specialist, Race Expert (проверено 06.10.2026).</p>
+<p><strong>Инструменты и API:</strong></p>
+<ul>
+<li>n8n: <a href="https://n8n.io/pricing/" target="_blank" rel="noopener">цены</a>, <a href="https://docs.n8n.io/" target="_blank" rel="noopener">документация</a>.</li>
+<li>Make: <a href="https://www.make.com/en/pricing" target="_blank" rel="noopener">цены</a>, <a href="https://help.make.com/adjustments-to-plans-and-pricing" target="_blank" rel="noopener">изменения тарифов</a>, обзор цен <a href="https://www.jetadmin.io/blog/make-pricing/" target="_blank" rel="noopener">jetadmin.io</a>.</li>
+<li>«Новая почта»: <a href="https://api-portal.novapost.com/methods/ua/api-docs-ua/eng" target="_blank" rel="noopener">API для Украины</a>, <a href="https://api-portal.novapost.com/methods/ua/api-docs-ua/ua/treking" target="_blank" rel="noopener">трекинг</a>, <a href="https://api-portal.novapost.com/methods/ua/api-docs-ua/ua/ekspres-nakladna" target="_blank" rel="noopener">экспресс-накладная</a>, <a href="https://novaposhta.ua/en/for-business/cooperation/integration/" target="_blank" rel="noopener">как получить ключ</a>.</li>
+<li>OpenAI: <a href="https://developers.openai.com/api/docs/pricing" target="_blank" rel="noopener">цены API</a>.</li>
+</ul>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#glossary">→ далее: Глоссарий</a></p>
+<hr />
+<h2><a id="glossary"></a>21. Глоссарий</h2>
+<table>
+<thead>
+<tr>
+<th>Термин</th>
+<th>Простыми словами</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a id="g-ai"></a><strong>AI</strong> (Artificial Intelligence)</td>
+<td>искусственный интеллект; здесь — языковые модели, которые пишут тексты и понимают вопросы</td>
+</tr>
+<tr>
+<td><a id="g-llm"></a><strong>LLM</strong> (Large Language Model)</td>
+<td>большая языковая модель, «мозг» AI-агента (например, модели OpenAI)</td>
+</tr>
+<tr>
+<td><a id="g-api"></a><strong>API</strong> (Application Programming Interface)</td>
+<td>«вход» в программу для других программ: запрос по адресу → ответ в JSON</td>
+</tr>
+<tr>
+<td><a id="g-endpoint"></a><strong>Эндпоинт</strong> (endpoint)</td>
+<td>один конкретный адрес API, например <code>GET /api/orders</code></td>
+</tr>
+<tr>
+<td><a id="g-webhook"></a><strong>Вебхук</strong> (webhook)</td>
+<td>«звонок» от одной системы другой: «случилось событие, вот данные». Обратное к опросу по расписанию</td>
+</tr>
+<tr>
+<td><a id="g-n8n"></a><strong>n8n</strong></td>
+<td>конструктор автоматизаций из блоков-узлов; можно поставить на свой сервер</td>
+</tr>
+<tr>
+<td><a id="g-make"></a><strong>Make</strong></td>
+<td>облачный конструктор автоматизаций, похожий на n8n, оплата за действия</td>
+</tr>
+<tr>
+<td><a id="g-workflow"></a><strong>Воркфлоу</strong> (workflow)</td>
+<td>цепочка шагов автоматизации в n8n; в Make называется «сценарий»</td>
+</tr>
+<tr>
+<td><a id="g-node"></a><strong>Узел</strong> (node)</td>
+<td>один блок воркфлоу: Webhook, HTTP Request, IF, Code, Telegram…</td>
+</tr>
+<tr>
+<td><a id="g-trigger"></a><strong>Триггер</strong> (trigger)</td>
+<td>узел, который запускает воркфлоу: по расписанию (Schedule Trigger), по вебхуку, по сообщению</td>
+</tr>
+<tr>
+<td><a id="g-execution"></a><strong>Execution</strong></td>
+<td>один запуск воркфлоу n8n целиком; единица оплаты в облаке n8n</td>
+</tr>
+<tr>
+<td><a id="g-credit"></a><strong>Credit</strong> (Make)</td>
+<td>единица оплаты в Make: одно действие одного модуля</td>
+</tr>
+<tr>
+<td><a id="g-self-host"></a><strong>Self-host</strong></td>
+<td>поставить программу на свой сервер, а не пользоваться чужим облаком</td>
+</tr>
+<tr>
+<td><a id="g-jwt"></a><strong>JWT</strong> (JSON Web Token)</td>
+<td>подписанный «пропуск» с данными пользователя (id, роль), который выдаёт Auth-сервис</td>
+</tr>
+<tr>
+<td><a id="g-swagger"></a><strong>Swagger</strong></td>
+<td>страница с описанием всех эндпоинтов API, где их можно попробовать</td>
+</tr>
+<tr>
+<td><a id="g-spa"></a><strong>SPA</strong> (Single Page Application)</td>
+<td>сайт, который загружается один раз и дальше меняет экраны без перезагрузки</td>
+</tr>
+<tr>
+<td><a id="g-sku"></a><strong>SKU</strong></td>
+<td>артикул, уникальный код товара (на <a href="#scr-product">рис. 3</a> — DJ-088)</td>
+</tr>
+<tr>
+<td><a id="g-facet"></a><strong>Фасет</strong> (facet)</td>
+<td>фильтр каталога по характеристике: бренд, ткань, размер, цвет</td>
+</tr>
+<tr>
+<td><a id="g-ttn"></a><strong>ТТН</strong></td>
+<td>товарно-транспортная накладная «Новой почты», номер посылки для трекинга</td>
+</tr>
+<tr>
+<td><a id="g-seo"></a><strong>SEO</strong></td>
+<td>оптимизация под поисковики: заголовки, описания, ключевые слова</td>
+</tr>
+<tr>
+<td><a id="g-utm"></a><strong>UTM</strong></td>
+<td>метки в ссылке, по которым видно, откуда пришёл покупатель</td>
+</tr>
+<tr>
+<td><a id="g-crm"></a><strong>CRM</strong></td>
+<td>система учёта клиентов и сделок</td>
+</tr>
+<tr>
+<td><a id="g-kpi"></a><strong>KPI</strong></td>
+<td>ключевые показатели: заказы, выручка, средний чек, отмены</td>
+</tr>
+<tr>
+<td><a id="g-prompt"></a><strong>Промпт</strong> (prompt)</td>
+<td>инструкция для AI-модели: роль, задача, правила</td>
+</tr>
+<tr>
+<td><a id="g-hallucination"></a><strong>Галлюцинация</strong></td>
+<td>когда AI уверенно пишет то, чего нет в данных</td>
+</tr>
+<tr>
+<td><a id="g-prompt-injection"></a><strong>Prompt injection</strong></td>
+<td>попытка через текст сообщения заставить AI нарушить правила («забудь инструкции и…»)</td>
+</tr>
+<tr>
+<td><a id="g-rag"></a><strong>RAG</strong></td>
+<td>AI отвечает, сначала найдя подходящие куски в базе знаний</td>
+</tr>
+<tr>
+<td><a id="g-orchestrator"></a><strong>Оркестратор</strong></td>
+<td>главный AI-агент, который сам решает, какие воркфлоу вызвать, и собирает результат</td>
+</tr>
+<tr>
+<td><a id="g-mcp"></a><strong>MCP</strong> (Model Context Protocol)</td>
+<td>стандарт, по которому AI-агент подключает внешние инструменты</td>
+</tr>
+<tr>
+<td><a id="g-hitl"></a><strong>Human-in-the-loop (HITL)</strong></td>
+<td>«человек в контуре»: автоматизация готовит, человек одобряет</td>
+</tr>
+<tr>
+<td><a id="g-hmac"></a><strong>HMAC-подпись</strong></td>
+<td>секретная подпись запроса: получатель проверяет, что вебхук пришёл именно от Perry</td>
+</tr>
+<tr>
+<td><a id="g-idempotency"></a><strong>Идемпотентность</strong></td>
+<td>повтор одного и того же запроса не создаёт дубль (вторую ТТН)</td>
+</tr>
+<tr>
+<td><a id="g-quickwin"></a><strong>Quick win</strong></td>
+<td>быстрая победа: дешёвая задача с заметным эффектом</td>
+</tr>
+</tbody>
+</table>
+<p class="navlinks"><a href="#toc">↑ к оглавлению</a> · <a href="#short">→ к началу: Коротко</a></p>
+</main></div>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+mermaid.initialize({startOnLoad:false,theme:"base",securityLevel:"loose",flowchart:{useMaxWidth:true},
+ themeVariables:{primaryColor:"#e3ecff",primaryBorderColor:"#2f5fd0",primaryTextColor:"#16213a",lineColor:"#6b7a99",secondaryColor:"#eef9d6",tertiaryColor:"#f6f8fd",fontFamily:"Segoe UI, Roboto, Arial",pie1:"#2f5fd0",pie2:"#b8e64a",pie3:"#5b8ae6",pie4:"#f2a03d",pie5:"#9aa7c2"}});
+window.mermaid=mermaid;window.__mermaidErrors=[];
+try{await mermaid.run({querySelector:"pre.mermaid",suppressErrors:false});}catch(e){window.__mermaidErrors.push(String(e&&e.message||e));}
+if(location.hash){const t=document.getElementById(decodeURIComponent(location.hash.slice(1)));if(t)t.scrollIntoView({behavior:'instant'});}
+window.__mermaidDone=true;
+</script>
+<script>
+const links=[...document.querySelectorAll('aside a')];const map=new Map(links.map(a=>[a.getAttribute('href').slice(1),a]));
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=map.get(e.target.id);if(a){a.classList.add('active');a.scrollIntoView({block:'nearest'});}}})},{rootMargin:"0px 0px -75% 0px"});
+map.forEach((a,id)=>{const el=document.getElementById(id);if(el)obs.observe(el);});
+</script></body></html>
