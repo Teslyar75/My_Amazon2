@@ -3,9 +3,10 @@
 Клиент покупателя на **Expo / React Native** под тот же Auth + Product API, что и web-витрина.  
 Макеты: Figma iPhone frames (`cF0bKFsmenH6rrshGV0yO7`).  
 План: `docs/МОБИЛЬНОЕ-ПРИЛОЖЕНИЕ-REACT.md` · решение: `docs/РЕШЕНИЕ-MOBILE-С-КОДОМ.md`.  
-**Отчёт 01.10:** `docs/ОТЧЁТ-2026-10-01.md`.
+**Отчёт 01.10:** `docs/ОТЧЁТ-2026-10-01.md`.  
+**Отчёт 07.10 (LAN / wishlist / #M09):** `docs/журнал/2026-10-07.md` · готовность проекта **~96%**.
 
-**Вне скоупа:** админка, Internal Auth (#97).
+**Вне скоупа:** админка. Internal Auth (#97) — Done на Product API.
 
 ## Быстрый запуск
 
@@ -23,15 +24,16 @@ npm start
 # затем: a (Android) / i (iOS) / w (web)
 ```
 
-| Среда | `EXPO_PUBLIC_PRODUCT_URL` |
-|-------|--------------------------|
-| Android emulator | `http://10.0.2.2:5272` |
-| iOS simulator | `http://localhost:5272` |
-| Телефон в LAN | `http://<IP-ПК>:5272` |
+| Среда | Product URL |
+|-------|-------------|
+| Expo Web (`:8081`) | Metro proxy `/api` → ПК |
+| Expo Go (телефон) | авто: LAN IP ПК из Metro (`192.168.x.x:5272`) |
+| Android emulator | fallback `http://10.0.2.2:5272` |
 
 Auth по умолчанию — Azure Auth Service (как web).
 
-Нужен запущенный **Perry.Api** на `:5272`.
+**Expo Go:** телефон и ПК в одной Wi‑Fi; API слушает `0.0.0.0:5272` (не только localhost).  
+Красная плашка «Product unreachable» = телефон бил в `localhost` на себе или API не слушал LAN.
 
 ## Что уже есть (MVP каркас)
 
@@ -67,6 +69,23 @@ mobile/
 2. Home показывает товары  
 3. Login → JWT в SecureStore  
 4. PDP → To cart → Checkout → My orders  
+5. PDP → сердце (wishlist) при логине → `POST /api/wishlist` 200  
+
+## EAS (#M09)
+
+Статус **07.10:** подготовка готова (`eas.json`, splash, deep link, LAN origin). Cloud build ждёт `eas login` (аккаунт Expo).
+
+```bash
+cd mobile
+npx eas-cli@latest login
+npx eas-cli@latest init          # один раз — привязка projectId на expo.dev
+npx eas-cli@latest build -p android --profile preview
+```
+
+Профили в `eas.json`: `development` / `preview` (APK) / `production` (AAB).  
+Deep link: `perry://product/{id}`. Splash/иконки — в `app.json` + `assets/`.
+
+Для preview на эмуляторе задайте `EXPO_PUBLIC_PRODUCT_URL` в EAS secrets или пересоберите с `.env` (на устройстве — LAN IP ПК, не `localhost`).
 
 ## Примечание по навигации
 

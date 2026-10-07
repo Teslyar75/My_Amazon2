@@ -120,7 +120,10 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     overflow: "hidden",
   },
-  cardGrid: {},
+  cardGrid: {
+    width: "100%",
+    alignSelf: "stretch",
+  },
   cardRail: {},
   cardRelated: {
     width: "100%",
@@ -136,14 +139,14 @@ const styles = StyleSheet.create({
   },
   oos: { opacity: 0.72 },
   imageWrap: {
-    width: 139,
-    height: 139,
+    width: "100%",
+    aspectRatio: 1,
     borderRadius: 4,
     overflow: "hidden",
     backgroundColor: "#FAFAFA",
     borderWidth: 1,
     borderColor: colors.darkText,
-    alignSelf: "center",
+    alignSelf: "stretch",
   },
   imageWrapRelated: {
     width: "100%",
@@ -182,7 +185,7 @@ const styles = StyleSheet.create({
   },
   oosBadgeText: { color: colors.white, fontSize: 10, fontWeight: "700" },
   body: {
-    width: 139,
+    width: "100%",
     gap: 12,
     alignItems: "center",
   },

@@ -1,17 +1,17 @@
 import { Platform } from "react-native";
 import { getToken } from "./token";
+import { resolveNativeProductOrigin } from "./productOrigin";
 
-const PRODUCT_CONFIGURED = (process.env.EXPO_PUBLIC_PRODUCT_URL || "").replace(/\/$/, "");
 const AUTH_CONFIGURED = (process.env.EXPO_PUBLIC_AUTH_URL || "").replace(/\/$/, "");
 
 /**
  * Product API — тот же Perry.Api :5272, что и desktop.
  * Web: same-origin `/api` → Metro proxy → :5272 (как Vite, без CORS).
- * Native: EXPO_PUBLIC_PRODUCT_URL (localhost / 10.0.2.2 / LAN IP).
+ * Native / Expo Go: LAN IP хоста Metro (не localhost телефона).
  */
 function productBase(): string {
   if (Platform.OS === "web") return "";
-  return PRODUCT_CONFIGURED || "http://localhost:5272";
+  return resolveNativeProductOrigin();
 }
 
 /**
@@ -88,7 +88,7 @@ export async function apiFetch<T = unknown>(
           : "Network — Auth unreachable (EXPO_PUBLIC_AUTH_URL)"
         : Platform.OS === "web"
           ? "Network — Product proxy/unreachable (restart Expo; /api → :5272)"
-          : "Network — Product unreachable (EXPO_PUBLIC_PRODUCT_URL / :5272)",
+          : `Network — Product unreachable (${productBase()}). Phone+PC same Wi‑Fi; API must listen 0.0.0.0:5272`,
     );
   }
 
@@ -136,5 +136,5 @@ export function getProductOrigin(): string {
     }
     return "";
   }
-  return PRODUCT_CONFIGURED || "http://localhost:5272";
+  return resolveNativeProductOrigin();
 }

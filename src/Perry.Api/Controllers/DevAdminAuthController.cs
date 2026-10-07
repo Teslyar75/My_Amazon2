@@ -116,6 +116,8 @@ public sealed class DevAdminAuthController : ControllerBase
         var configured = _authInternal.IsConfigured;
         string? tokenProbe = null;
         string? error = null;
+        bool? usersLookupOk = null;
+        string? usersLookupHint = null;
         if (configured)
         {
             try
@@ -126,6 +128,24 @@ public sealed class DevAdminAuthController : ControllerBase
             {
                 error = ex.Message;
             }
+
+            if (!string.IsNullOrEmpty(tokenProbe))
+            {
+                try
+                {
+                    // Probe users.read: null = user absent or Auth denied — never leak profile.
+                    var profile = await _authInternal.GetUserAsync(LocalAdminUserId, ct);
+                    usersLookupOk = true;
+                    usersLookupHint = profile is null
+                        ? "GET /internal/users/{id} reachable (no profile for local admin Guid — OK if user only in Product)."
+                        : "GET /internal/users/{id} returned a profile.";
+                }
+                catch (Exception ex)
+                {
+                    usersLookupOk = false;
+                    usersLookupHint = ex.Message;
+                }
+            }
         }
 
         return Ok(new
@@ -134,6 +154,8 @@ public sealed class DevAdminAuthController : ControllerBase
             serviceName,
             credentialConfigured = configured,
             tokenOk = !string.IsNullOrEmpty(tokenProbe),
+            usersLookupOk,
+            usersLookupHint,
             hint = configured
                 ? (tokenProbe is null
                     ? "Credential задан, но /internal/auth/token не ответил 200 — сверьте имя сервиса и plaintext с Владом (#97)."

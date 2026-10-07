@@ -34,6 +34,42 @@ import type { MainTabParamList, RootStackParamList } from "./types";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tabs = createBottomTabNavigator<MainTabParamList>();
 
+/** Deep link: perry://product/{id} (#M09) */
+const linking = {
+  prefixes: ["perry://"],
+  config: {
+    screens: {
+      Product: "product/:id",
+      MainTabs: {
+        screens: {
+          HomeTab: {
+            screens: {
+              Home: "home",
+              Product: "home/product/:id",
+            },
+          },
+          CatalogTab: {
+            screens: {
+              Products: "catalog",
+              Product: "catalog/product/:id",
+            },
+          },
+          CartTab: {
+            screens: {
+              Cart: "cart",
+            },
+          },
+          AccountTab: {
+            screens: {
+              Account: "account",
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
 const stackScreenOptions = {
   headerStyle: { backgroundColor: colors.white },
   headerTintColor: colors.darkText,
@@ -175,7 +211,7 @@ export function RootNavigator() {
   }
 
   return (
-    <NavigationContainer ref={navigationRef}>
+    <NavigationContainer ref={navigationRef} linking={linking}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="MainTabs">
           {() => <MainTabs onMenu={() => setMenuOpen(true)} />}

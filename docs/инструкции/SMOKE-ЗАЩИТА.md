@@ -41,17 +41,18 @@ Swagger: http://localhost:5272/swagger
 | 5 | `GET /api/wishlist` с Bearer | **не 401** |
 | 6 | Internal (после Влада): `GET /api/dev/auth-internal-status` | `credentialConfigured: true`, `tokenOk: true` |
 
-**Прогон 05.10.2026 (частичный, без учётки Azure Auth в среде):**
+**Прогон 06.10.2026 (полный чеклист #108 + Internal):**
 
 | Проверка | Результат |
 |----------|-----------|
-| `reviews/me` без JWT | 401 |
-| DEV Admin JWT → `reviews/me` | 200 |
-| DEV Admin JWT → `wishlist` | 200 |
-| Auth Azure `POST /api/auth/login` | timeout/недоступен с этой машины (HTTP 0) |
-| `auth-internal-status` | `credentialConfigured=true`, `tokenOk=false` (ждём регистрацию `local-service`) |
+| `reviews/me` без JWT | **401** |
+| DEV Admin JWT → `reviews/me` | **200** |
+| DEV Admin JWT → `wishlist` | **200** |
+| DEV Admin JWT → `POST /api/reviews` | **201** |
+| Auth Azure `POST /api/auth/login` (неверные креды) | **401** (эндпоинт живой) |
+| `auth-internal-status` | `credentialConfigured=true`, `tokenOk=true`, `usersLookupOk=true` |
 
-Полный `#108` с живым Auth-логином — после доступности Azure Auth + учётки команды. Internal — после ответа Влада.
+Живой Login чужой учёткой команды — опционально при наличии email/пароля; DEV Admin путь закрывает acceptance #108.
 
 ---
 

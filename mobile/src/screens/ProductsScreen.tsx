@@ -261,10 +261,15 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   sortText: { flex: 1, fontWeight: "600", color: colors.darkText, fontSize: 13 },
-  list: { paddingHorizontal: 16, paddingBottom: 32, gap: 16 },
-  row: { justifyContent: "space-between", gap: 16, marginBottom: 16 },
-  cell: { width: 171 },
-  error: { marginHorizontal: 16, color: colors.destructive },
+  list: { paddingHorizontal: space.lg, paddingBottom: 32 },
+  row: {
+    gap: space.lg,
+    marginBottom: space.lg,
+    justifyContent: "space-between",
+  },
+  // flex:1 без maxWidth 50% — иначе gap съедает правый отступ и правая карточка липнет к краю
+  cell: { flex: 1, minWidth: 0 },
+  error: { marginHorizontal: space.lg, color: colors.destructive },
   empty: { textAlign: "center", marginTop: 40, color: colors.muted },
   pager: {
     flexDirection: "row",

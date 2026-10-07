@@ -48,3 +48,5 @@ vibe-prompts/.vibe-sequence-state.json
 
 
 **.env
+
+artifacts/
